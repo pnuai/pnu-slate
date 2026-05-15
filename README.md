@@ -1,8 +1,11 @@
 # PNU Slate: 차세대 온라인 브로슈어 CMS
 
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Docusaurus](https://img.shields.io/badge/Docusaurus-3.10.1-green.svg)](https://docusaurus.io/)
 [![React](https://img.shields.io/badge/React-19.0.0-blue.svg)](https://react.dev/)
+
+> **서비스 링크: [https://pnuai.github.io](https://pnuai.github.io)**
 
 PNU Slate는 부산대학교 AI융합교육원의 다양한 교육 프로그램을 체계적으로 관리하고 배포하기 위한 통합 디지털 브로슈어 플랫폼입니다. Docusaurus 기반의 정적 사이트 생성(SSG) 기술과 Git 기반의 무설치형 Web CMS를 결합하여 개발 생산성과 운영 편의성을 동시에 제공합니다.
 
@@ -27,7 +30,7 @@ graph TD
 ## 핵심 기능
 
 ### PNU AI Hub 
-**[PNU AI Hub](https://pnuai.github.io)**는 전체 시스템의 메인 게이트웨이 역할을 수행합니다.
+PNU AI Hub는 전체 시스템의 메인 게이트웨이 역할을 수행합니다.
 
 통합 접근 지점: 별도의 리포지토리로 관리되는 개별 교육 과정(부트캠프, 대학원, 교원 연수 등) 브로슈어를 한곳에서 탐색하고 접근할 수 있는 인덱스 기능을 제공합니다.
 
@@ -43,6 +46,11 @@ graph TD
 실시간 위지윅(WYSIWYG) 편집: 커스텀 React 컴포넌트(Columns, Highlight 등)가 적용된 결과물을 미리보며 편집할 수 있습니다.
 
 자동화된 배포 연동: 저장 시 GitHub API를 호출하여 소스 코드를 업데이트하며, 이는 곧바로 CI/CD 빌드로 이어집니다.
+
+
+---
+
+## 부가기능
 
 - **프리미엄 MDX 컴포넌트**: 다단 레이아웃(Columns), 단계별 블록(Phase Blocks), 데이터 시각화 등 브로슈어에 특화된 커스텀 React 컴포넌트 제공.
 - **제로-설정 CMS**: 별도의 로컬 환경 없이 `/admin` 경로를 통해 즉시 접속 가능한 관리자 포탈. 실제 디자인과 100% 일치하는 실시간 미리보기 지원.
