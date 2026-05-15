@@ -50,7 +50,7 @@ const config = {
   // GitHub Pages URL (조직 이동 시 자동 대응)
   url: process.env.GITHUB_REPOSITORY 
     ? `https://${process.env.GITHUB_REPOSITORY.split('/')[0]}.github.io` 
-    : "https://pnu-ai-center.github.io",
+    : "https://pnuai.github.io",
 
   // Repository name (GitHub Actions에서 자동 인식, 로컬은 /)
   baseUrl: process.env.GITHUB_REPOSITORY ? `/${process.env.GITHUB_REPOSITORY.split('/')[1]}/` : "/",
@@ -76,8 +76,7 @@ const config = {
           editUrl: ({versionDocsDirPath, docPath}) => {
             // Docusaurus 빌드 경고(Broken Link) 방지를 위해 절대 경로로 반환
             const isLocal = !process.env.GITHUB_REPOSITORY;
-            const baseUrl = isLocal ? "/" : `/${process.env.GITHUB_REPOSITORY.split('/')[1]}/`;
-            const domain = isLocal ? "http://localhost:3000" : "https://pnu-ai-center.github.io";
+            const domain = isLocal ? "http://localhost:3000" : "https://pnuai.github.io";
             return `${domain}${baseUrl}admin/index.html?file=${docPath}`;
           },
         },
@@ -117,7 +116,7 @@ const config = {
           items: dynamicNavItems,
         },
         {
-          href: "https://pnu-ai-center.github.io",
+          href: "https://pnuai.github.io",
           position: "right",
           label: "허브 홈으로",
         },
