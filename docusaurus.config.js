@@ -57,7 +57,7 @@ const config = {
 
   // GitHub Pages deployment config
   organizationName: process.env.GITHUB_REPOSITORY ? process.env.GITHUB_REPOSITORY.split('/')[0] : "pnuai",
-  projectName: process.env.GITHUB_REPOSITORY ? process.env.GITHUB_REPOSITORY.split('/')[1] : "2026-ai-guidebook",
+  projectName: process.env.GITHUB_REPOSITORY ? process.env.GITHUB_REPOSITORY.split('/')[1] : "pnu-slate",
 
   onBrokenLinks: "warn",
 
