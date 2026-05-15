@@ -64,6 +64,14 @@ const chapters =
     "theme": "gray",
     "link": "/docs/part-8",
     "sidebar_position": 8
+  },
+  {
+    "id": "template",
+    "title": "템플릿 및 컴포넌트 가이드",
+    "description": "",
+    "theme": "blue",
+    "link": "/docs/template",
+    "sidebar_position": 99
   }
 ];
 

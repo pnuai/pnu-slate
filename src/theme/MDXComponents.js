@@ -9,6 +9,7 @@ export default {
   ...MDXComponents,
   Columns,
   Col,
+  Column: Col,
   Highlight,
   HeroButton,
 };
