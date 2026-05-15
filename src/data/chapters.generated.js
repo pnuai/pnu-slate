@@ -1,0 +1,70 @@
+
+const chapters =
+[
+  {
+    "id": "intro",
+    "title": "대학 소개 및 운영 방향",
+    "description": "",
+    "theme": "gray",
+    "link": "/docs/intro",
+    "sidebar_position": 1
+  },
+  {
+    "id": "part-2",
+    "title": "교육목표 및 혁신노력",
+    "description": "",
+    "theme": "gray",
+    "link": "/docs/part-2",
+    "sidebar_position": 2
+  },
+  {
+    "id": "part-3",
+    "title": "대학의 자율적인 교육혁신",
+    "description": "",
+    "theme": "gray",
+    "link": "/docs/part-3",
+    "sidebar_position": 3
+  },
+  {
+    "id": "part-4",
+    "title": "교육환경 개선 및 성과 모니터링",
+    "description": "",
+    "theme": "gray",
+    "link": "/docs/part-4",
+    "sidebar_position": 4
+  },
+  {
+    "id": "part-5",
+    "title": "SW전공교육 강화",
+    "description": "",
+    "theme": "gray",
+    "link": "/docs/part-5",
+    "sidebar_position": 5
+  },
+  {
+    "id": "part-6",
+    "title": "AI·SW융합교육 및 비전공자 전문교육 확대",
+    "description": "",
+    "theme": "gray",
+    "link": "/docs/part-6",
+    "sidebar_position": 6
+  },
+  {
+    "id": "part-7",
+    "title": "성과확산 및 인재기반 조성",
+    "description": "",
+    "theme": "gray",
+    "link": "/docs/part-7",
+    "sidebar_position": 7
+  },
+  {
+    "id": "part-8",
+    "title": "대학 일반 현황",
+    "description": "",
+    "theme": "gray",
+    "link": "/docs/part-8",
+    "sidebar_position": 8
+  }
+];
+
+export default chapters;
