@@ -76,6 +76,7 @@ const config = {
           editUrl: ({versionDocsDirPath, docPath}) => {
             // Docusaurus 빌드 경고(Broken Link) 방지를 위해 절대 경로로 반환
             const isLocal = !process.env.GITHUB_REPOSITORY;
+            const baseUrl = isLocal ? "/" : `/${process.env.GITHUB_REPOSITORY.split('/')[1]}/`;
             const domain = isLocal ? "http://localhost:3000" : "https://pnuai.github.io";
             return `${domain}${baseUrl}admin/index.html?file=${docPath}`;
           },
