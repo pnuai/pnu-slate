@@ -103,4 +103,4 @@ graph TD
 
 본 프로젝트는 [MIT License](LICENSE)를 따릅니다.
 
-&copy; 2026 Pusan National University AI Convergence Education Center.
+&copy; 2026 Pusan National University AI Convergence Education Institute.
