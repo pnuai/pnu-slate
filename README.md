@@ -1,4 +1,4 @@
-# PNU Slate: 차세대 온라인 브로슈어 CMS
+# PNU Slate: 온라인 브로슈어 CMS
 
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
