@@ -117,6 +117,11 @@ const config = {
           items: dynamicNavItems,
         },
         {
+          to: "/admin/",
+          position: "right",
+          label: "관리 페이지",
+        },
+        {
           href: "https://pnuai.github.io",
           position: "right",
           label: "허브 홈으로",
