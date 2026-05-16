@@ -120,6 +120,7 @@ const config = {
           to: "/admin/",
           position: "right",
           label: "관리 페이지",
+          target: "_blank",
         },
         {
           href: "https://pnuai.github.io",
