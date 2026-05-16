@@ -744,8 +744,8 @@ main .col--3 {
 }
 
 /* =========================================
-   PNU Slate Print System v3 (MDX Aware)
-   (웹 UI는 제거하고 브로슈어 레이아웃은 보존)
+   PNU Slate Print System v3 (Refined)
+   (브로슈어 본문 내 MDX 레이아웃 정밀 안정화)
    ========================================= */
 
 @media print {
@@ -780,7 +780,7 @@ main .col--3 {
     display: none !important;
   }
 
-  /* 2. Docusaurus 레이아웃 초기화 (MDX Flex/Grid는 유지) */
+  /* 2. Docusaurus 레이아웃 초기화 */
   .main-wrapper,
   .container,
   main,
@@ -796,27 +796,39 @@ main .col--3 {
     box-shadow: none !important;
   }
 
-  /* 3. MDX 레이아웃 컴포넌트 보존 (컬럼 붕괴 방지) */
-  .columns,
-  .row,
-  .grid,
-  [class*="column"],
-  .brochureHero {
+  /* 3. MDX Columns 정밀 안정화 (본문 내 row만 타겟팅) */
+  .theme-doc-markdown .row {
     display: flex !important;
     flex-direction: row !important;
-    flex-wrap: nowrap !important; /* 인쇄 시 줄바꿈 방지 */
+    flex-wrap: nowrap !important;
     gap: 24px !important;
     width: 100% !important;
     align-items: flex-start !important;
+    margin: 1.5rem 0 !important;
     break-inside: avoid !important;
     page-break-inside: avoid !important;
   }
 
-  /* 컬럼 내부 요소 비율 조정 */
-  [class*="column"] > *,
-  .col > * {
+  /* Docusaurus 컬럼 기본 설정 */
+  .theme-doc-markdown .col {
     flex: 1 1 0 !important;
-    min-width: 0 !important; /* 컨테이너 탈출 방지 */
+    width: 0 !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* 3컬럼 (col--4) 전용 너비 */
+  .theme-doc-markdown .col--4 {
+    width: 33.333% !important;
+    max-width: 33.333% !important;
+    flex: 0 0 33.333% !important;
+  }
+
+  /* 2컬럼 (col--6) 전용 너비 */
+  .theme-doc-markdown .col--6 {
+    width: 50% !important;
+    max-width: 50% !important;
+    flex: 0 0 50% !important;
   }
 
   /* 핵심 문서 영역 */
@@ -833,39 +845,11 @@ main .col--3 {
   }
 
   /* 4. 인쇄용 타이포그래피 (pt 단위 사용) */
-  .theme-doc-markdown h1 {
-    font-size: 28pt !important;
-    margin-top: 0 !important;
-    margin-bottom: 20pt !important;
-    color: #0a2463 !important;
-  }
+  .theme-doc-markdown h1 { font-size: 28pt !important; margin-top: 0 !important; margin-bottom: 20pt !important; color: #0a2463 !important; }
+  .theme-doc-markdown h2 { font-size: 20pt !important; margin-top: 24pt !important; margin-bottom: 12pt !important; color: #0a2463 !important; border-left: 5px solid #f59e0b !important; padding-left: 10pt !important; break-after: avoid-page; page-break-after: avoid; display: block !important; }
+  .theme-doc-markdown h3 { font-size: 16pt !important; margin-top: 18pt !important; margin-bottom: 10pt !important; color: #1e3a8a !important; break-after: avoid-page; page-break-after: avoid; display: block !important; }
 
-  .theme-doc-markdown h2 {
-    font-size: 20pt !important;
-    margin-top: 24pt !important;
-    margin-bottom: 12pt !important;
-    color: #0a2463 !important;
-    border-left: 5px solid #f59e0b !important;
-    padding-left: 10pt !important;
-    break-after: avoid-page;
-    page-break-after: avoid;
-    display: block !important;
-  }
-
-  .theme-doc-markdown h3 {
-    font-size: 16pt !important;
-    margin-top: 18pt !important;
-    margin-bottom: 10pt !important;
-    color: #1e3a8a !important;
-    break-after: avoid-page;
-    page-break-after: avoid;
-    display: block !important;
-  }
-
-  .markdown p,
-  .theme-doc-markdown p,
-  .markdown li,
-  .theme-doc-markdown li {
+  .markdown p, .theme-doc-markdown p, .markdown li, .theme-doc-markdown li {
     font-size: 11pt !important;
     line-height: 1.7 !important;
     color: #111 !important;
@@ -873,31 +857,13 @@ main .col--3 {
   }
 
   /* 페이지 중간 잘림 방지 */
-  blockquote,
-  table,
-  pre,
-  img,
-  li {
+  blockquote, table, pre, img, li, .brochureHero {
     break-inside: avoid !important;
     page-break-inside: avoid !important;
   }
 
   /* 이미지 및 코드 블록 최적화 */
-  img {
-    max-width: 100% !important;
-    height: auto !important;
-    border-radius: 8px !important;
-  }
-
-  pre {
-    overflow: hidden !important;
-    white-space: pre-wrap !important;
-    word-break: break-all !important;
-    border: 1px solid #e2e8f0 !important;
-    padding: 10pt !important;
-  }
-
-  a::after {
-    content: "" !important;
-  }
+  img { max-width: 100% !important; height: auto !important; border-radius: 8px !important; }
+  pre { overflow: hidden !important; white-space: pre-wrap !important; word-break: break-all !important; border: 1px solid #e2e8f0 !important; padding: 10pt !important; }
+  a::after { content: "" !important; }
 }
