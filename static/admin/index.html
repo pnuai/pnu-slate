@@ -136,14 +136,99 @@
   .hidden{display:none!important}
 
   /* MODAL */
-  .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:200}
-  .modal{background:white;border-radius:24px;width:95%;max-width:1200px;height:90vh;padding:32px;box-shadow:0 20px 40px rgba(0,0,0,.2);position:relative;display:flex;flex-direction:column}
-  .modal-close{position:absolute;top:20px;right:24px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--gray-400)}
-  .modal-title{font-size:1.2rem;font-weight:800;margin-bottom:16px;flex-shrink:0}
+  .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15, 23, 42, 0.6);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:200}
+  .modal{background:#f1f5f9;border-radius:24px;width:98%;max-width:1800px;height:96vh;padding:0;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);position:relative;display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(255,255,255,0.1)}
+  .modal-header{padding:16px 24px;background:white;border-bottom:1px solid var(--gray-200);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;z-index:10}
+  .modal-close{background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--gray-400);line-height:1;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;transition:0.2s}
+  .modal-close:hover{background:var(--red-light);color:var(--red)}
+  .modal-title{font-size:1rem;font-weight:800;margin:0;display:flex;align-items:center;gap:8px}
+  .modal-title::before{content:'🛠';font-size:1.2rem}
   
-  /* EDITOR */
-  #toast-editor{flex:1;min-height:0;margin-bottom:20px;border-radius:12px;overflow:hidden;border:1px solid var(--gray-200)}
+  /* LIVE STUDIO LAYOUT */
+  .studio-container {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+    background: #f8fafc;
+  }
+  
+  /* LEFT: EDITOR AREA */
+  .studio-editor-pane {
+    width: 38%;
+    min-width: 550px;
+    display: flex;
+    flex-direction: column;
+    background: #f8fafc;
+    border-right: 1px solid var(--gray-200);
+    position: relative;
+  }
+  
+  .editor-property-bar {
+    padding: 20px 24px;
+    background: white;
+    border-bottom: 1px solid var(--gray-200);
+    display: grid;
+    grid-template-columns: 1fr 70px 90px 90px;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  
+  .editor-content-area {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  /* RIGHT: PREVIEW AREA */
+  .studio-preview-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background: #cbd5e1; /* Slightly darker to make paper pop */
+    overflow: hidden;
+  }
+  
+  .preview-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+  }
+
+  .preview-toolbar {
+    padding: 10px 24px;
+    background: #1e293b; /* Dark toolbar for pro look */
+    color: #94a3b8;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  /* EDITOR OVERRIDE */
+  #toast-editor{flex:1;min-height:0;margin-bottom:0;border:1px solid var(--gray-200);border-radius:12px;overflow:hidden;box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);background:white}
   .toastui-editor-defaultUI{border:none !important;height:100% !important}
+  
+  /* [중요] Toast UI 내부의 모든 미리보기 및 모드 전환 요소 제거 */
+  .toastui-editor-main-container .toastui-editor-md-splitter { display: none !important; }
+  .toastui-editor-main-container .toastui-editor-md-preview { display: none !important; }
+  .toastui-editor-main-container .toastui-editor-md-container { width: 100% !important; }
+  .toastui-editor-main-container .toastui-editor-md-editor { width: 100% !important; float: none !important; }
+  
+  /* 하단 모드 전환 탭 (마크다운/위지윅) 숨기기 */
+  .toastui-editor-mode-switch { display: none !important; }
+  
+  /* 상단 탭 (미리보기 탭 등) 숨기기 */
+  .toastui-editor-tabs { display: none !important; }
+  
+  /* INPUT STYLING REFINEMENT */
+  .field label { font-size: 0.7rem; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .field input, .field select { padding: 8px 12px; font-size: 0.85rem; border-radius: 8px; border-color: var(--gray-200); }
+  .field input:focus { border-color: var(--blue); background: white; }
 
 </style>
 </head>
@@ -260,35 +345,60 @@
   </div>
 </div>
 
-<!-- ──────────── EDIT MODAL ──────────── -->
+<!-- ──────────── LIVE STUDIO MODAL ──────────── -->
 <div class="modal-overlay" id="modal-edit">
   <div class="modal">
-    <button class="modal-close" onclick="closeEditModal()">×</button>
-    <div class="modal-title" id="modal-filename">파일 수정</div>
-    <div class="file-card-body" style="padding:0; grid-template-columns:1fr 80px 100px 100px; margin-bottom:16px; flex-shrink:0">
-      <div class="field">
-        <label>제목</label>
-        <input type="text" id="edit-title">
-      </div>
-      <div class="field">
-        <label>순서</label>
-        <input type="number" id="edit-pos">
-      </div>
-      <div class="field">
-        <label>ID</label>
-        <input type="text" id="edit-id" placeholder="intro">
-      </div>
-      <div class="field">
-        <label>색상 테마</label>
-        <select id="edit-theme"></select>
+    <div class="modal-header">
+      <div class="modal-title" id="modal-filename">라이브 브로슈어 스튜디오</div>
+      <div style="display:flex;gap:12px;align-items:center">
+        <button class="btn btn-outline btn-sm" onclick="closeEditModal()">닫기</button>
+        <button class="btn btn-primary btn-sm" id="btn-save-edit" onclick="saveEdit()">저장 및 배포</button>
+        <button class="modal-close" style="margin-left:8px" onclick="closeEditModal()">×</button>
       </div>
     </div>
-    
-    <div id="toast-editor"></div>
 
-    <div class="action-row" style="justify-content:flex-end; flex-shrink:0">
-      <button class="btn btn-outline" onclick="closeEditModal()">취소</button>
-      <button class="btn btn-primary" id="btn-save-edit" onclick="saveEdit()">저장 및 배포</button>
+    <div class="studio-container">
+      <!-- LEFT: EDITOR AREA -->
+      <div class="studio-editor-pane">
+        <div class="editor-property-bar">
+          <div class="field">
+            <label>문서 제목</label>
+            <input type="text" id="edit-title" placeholder="예) AI융합교육원 소개">
+          </div>
+          <div class="field">
+            <label>순서</label>
+            <input type="number" id="edit-pos" placeholder="1">
+          </div>
+          <div class="field">
+            <label>문서 ID</label>
+            <input type="text" id="edit-id" placeholder="intro">
+          </div>
+          <div class="field">
+            <label>테마 색상</label>
+            <select id="edit-theme"></select>
+          </div>
+        </div>
+        
+        <div class="editor-content-area">
+          <div id="toast-editor"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: PREVIEW AREA -->
+      <div class="studio-preview-pane">
+        <div class="preview-toolbar">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#10b981;box-shadow:0 0 12px rgba(16,185,129,0.6)"></span>
+            <span style="color:white;font-weight:700">LIVE RENDERER</span>
+            <span style="opacity:0.6;margin-left:6px">A4 브로슈어 규격 실시간 동기화</span>
+          </div>
+          <div style="display:flex;gap:12px">
+            <button class="btn-ghost" style="color:#cbd5e1" onclick="refreshPreview()">↻ 새로고침</button>
+            <button class="btn-ghost" style="color:#cbd5e1" onclick="printPreview()">🖨 인쇄 테스트</button>
+          </div>
+        </div>
+        <iframe src="/preview" class="preview-iframe" id="preview-frame"></iframe>
+      </div>
     </div>
   </div>
 </div>
@@ -478,7 +588,7 @@ function initEditor() {
     el: document.querySelector('#toast-editor'),
     height: '100%',
     initialEditType: 'markdown',
-    previewStyle: 'vertical',
+    previewStyle: 'tab',
     language: 'ko-KR',
     usageStatistics: false,
     toolbarItems: [
@@ -487,39 +597,50 @@ function initEditor() {
       ['ul', 'ol', 'task', 'indent', 'outdent'],
       ['table', 'image', 'link'],
       ['code', 'codeblock']
-    ]
-  });
-  loadPreviewCSS();
-}
-
-    // [NEW] 미리보기 전용 Typography 스타일 로드
-    async function loadPreviewCSS() {
-      try {
-        let css = "";
-        // 로컬/GitHub 구분하여 preview.css 로드
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-          const r = await fetch('/css/preview.css');
-          if (r.ok) css = await r.text();
-        } else {
-          const r = await ghFetch(`/repos/${ORG}/${REPO}/contents/src/css/preview.css?t=${Date.now()}`);
-          if (r.ok) {
-            const d = await r.json();
-            css = decodeURIComponent(escape(atob(d.content)));
-          }
-        }
-        
-        if (css) {
-          const style = document.createElement('style');
-          style.id = 'preview-typography-css';
-          style.innerHTML = css;
-          const oldStyle = document.getElementById('preview-typography-css');
-          if (oldStyle) oldStyle.remove();
-          document.head.appendChild(style);
-        }
-      } catch (e) {
-        console.error("preview.css 로드 실패:", e);
+    ],
+    events: {
+      change: () => {
+        syncToPreview();
       }
     }
+  });
+}
+
+/* ─── 라이브 프리뷰 동기화 ─── */
+function syncToPreview() {
+  if (!toastEditor) return;
+  const content = toastEditor.getMarkdown();
+  const frame = document.getElementById('preview-frame');
+  if (frame && frame.contentWindow) {
+    frame.contentWindow.postMessage({
+      type: 'MDX_UPDATE',
+      content: content
+    }, '*');
+  }
+}
+
+window.refreshPreview = () => {
+  const frame = document.getElementById('preview-frame');
+  if (frame) {
+    frame.src = frame.src; // Reload
+    // Wait a bit for load and then sync
+    setTimeout(syncToPreview, 1000);
+  }
+};
+
+window.printPreview = () => {
+  const frame = document.getElementById('preview-frame');
+  if (frame && frame.contentWindow) {
+    frame.contentWindow.print();
+  }
+};
+
+// Iframe이 준비되었다는 신호를 보내면 즉시 현재 내용 동기화
+window.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'PREVIEW_READY') {
+    syncToPreview();
+  }
+});
 
 /* ─── 새 문서 작성(모달) ─── */
 window.openCreateModal = () => {
@@ -535,10 +656,11 @@ window.openCreateModal = () => {
   if(!th.options.length) th.innerHTML = THEMES.map(t => `<option value="${t.value}">${t.label}</option>`).join('');
   th.value = 'blue';
   
-  th.value = 'blue';
-  
   toastEditor.setMarkdown('');
   document.getElementById('modal-edit').style.display = 'flex';
+  
+  // 약간의 지연 후 초기 동기화 (Iframe 로드 대기)
+  setTimeout(syncToPreview, 500);
 };
 
 /* ─── 메타데이터 및 본문 수정(모달) ─── */
@@ -573,6 +695,9 @@ async function openEditModal(name, sha) {
     
     toastEditor.setMarkdown(editTarget.text);
     document.getElementById('modal-edit').style.display = 'flex';
+    
+    // 초기 동기화
+    setTimeout(syncToPreview, 500);
   } catch(e) {
     alert(e.message);
   }

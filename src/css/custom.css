@@ -854,3 +854,21 @@ main .col--3 {
   pre { overflow: hidden !important; white-space: pre-wrap !important; word-break: break-all !important; border: 1px solid #e2e8f0 !important; padding: 10pt !important; }
   a::after { content: "" !important; }
 }
+
+/* =========================================
+   Live Preview Studio Specific Styles
+   ========================================= */
+.live-preview-container {
+  font-family: var(--ifm-font-family-base);
+}
+
+.live-preview-container .brochure-page-paper {
+  background-image: 
+    linear-gradient(white 0px, transparent 0px),
+    linear-gradient(90deg, #f1f5f9 1px, transparent 1px);
+  background-size: 100% 24px, 24px 100%;
+}
+
+.preview-iframe {
+  transition: opacity 0.3s ease;
+}
