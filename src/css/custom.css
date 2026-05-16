@@ -796,39 +796,36 @@ main .col--3 {
     box-shadow: none !important;
   }
 
-  /* 3. MDX Columns 정밀 안정화 (FINAL 고정 레이아웃 시스템) */
+  /* 3. MDX Columns 정밀 안정화 (Inline-Block 기반 고정 레이아웃) */
+  /* Chrome Print Engine의 Flex 계산 오류를 방지하기 위해 인라인 블록 방식을 사용합니다. */
   .theme-doc-markdown .row {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important; /* 인쇄물은 절대 줄바꿈 금지 */
-    justify-content: space-between !important;
-    align-items: flex-start !important;
+    display: block !important;
     width: 100% !important;
-    gap: 12px !important;
+    font-size: 0 !important; /* 인라인 블록 사이의 여백 제거 */
     margin: 24px 0 !important;
     break-inside: avoid !important;
     page-break-inside: avoid !important;
+    text-align: left !important;
   }
 
-  /* 공통 컬럼 설정 (반응형 제거) */
   .theme-doc-markdown .col {
-    padding: 0 !important;
-    min-width: 0 !important;
+    display: inline-block !important;
+    vertical-align: top !important;
+    font-size: 11pt !important; /* 폰트 크기 복구 */
     box-sizing: border-box !important;
-    overflow: hidden !important;
-    flex: none !important; /* 브라우저의 자동 너비 계산 차단 */
+    padding-right: 12px !important;
+    flex: none !important;
+    max-width: none !important;
   }
 
-  /* 3단 고정 (32% x 3 + 간격) */
+  /* 3컬럼 고정 폭 */
   .theme-doc-markdown .col--4 {
-    width: 32% !important;
-    max-width: 32% !important;
+    width: 33.333% !important;
   }
 
-  /* 2단 고정 (48% x 2 + 간격) */
+  /* 2컬럼 고정 폭 */
   .theme-doc-markdown .col--6 {
-    width: 48% !important;
-    max-width: 48% !important;
+    width: 50% !important;
   }
 
   /* 핵심 문서 영역 */
