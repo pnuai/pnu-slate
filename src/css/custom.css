@@ -744,122 +744,112 @@ main .col--3 {
 }
 
 /* =========================================
-   PNU Slate Print System v3 (Refined)
-   (브로슈어 본문 내 MDX 레이아웃 정밀 안정화)
+   PNU Slate Independent Brochure Layout System
+   (Docusaurus row/col 시스템과 분리된 독립 레이아웃)
    ========================================= */
 
+/* [WEB 전용 레이아웃] */
+.brochure-columns-2,
+.brochure-columns-3 {
+  display: flex;
+  gap: 20px;
+  margin: 2rem 0;
+  width: 100%;
+}
+
+.brochure-col {
+  flex: 1;
+  min-width: 0;
+}
+
+/* [PRINT / PDF 전용 레이아웃] */
 @media print {
   @page {
     size: A4 portrait;
-    margin: 16mm;
+    margin: 0; /* 물리적 여백은 CSS에서 제어 */
   }
 
   html,
   body {
+    width: 210mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
     background: white !important;
     overflow: visible !important;
-    padding: 0 !important;
-    margin: 0 !important;
   }
 
-  /* 1. 불필요한 웹 UI 요소 완전 제거 */
-  .navbar,
-  .theme-doc-sidebar-container,
-  .table-of-contents,
-  .pagination-nav,
-  .theme-back-to-top-button,
-  .breadcrumbs,
-  footer,
-  .footer,
-  .print-button,
-  .admin-controls,
-  .theme-edit-this-page,
-  .theme-last-updated,
-  nav,
-  button {
+  /* 불필요 UI 제거 */
+  .navbar, .footer, .table-of-contents, .theme-doc-sidebar-container, 
+  nav, aside, button, .pagination-nav, .theme-back-to-top-button, 
+  .breadcrumbs, .theme-edit-this-page, .theme-last-updated {
     display: none !important;
   }
 
-  /* 2. Docusaurus 레이아웃 초기화 */
+  /* Docusaurus 레이아웃 평면화 (폭 붕괴 방지) */
   .main-wrapper,
-  .container,
   main,
-  div[class*="docItemCol_"],
-  div[class*="docItemContainer_"] {
-    display: block !important;
+  article,
+  .container,
+  [class*="docItem"],
+  [class*="docMainContainer"],
+  .row {
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
-    background: white !important;
-    border: none !important;
+    display: block !important;
+    transform: none !important;
+    float: none !important;
     box-shadow: none !important;
+    border: none !important;
   }
 
-  /* 3. MDX Columns 정밀 안정화 (Inline-Block 기반 고정 레이아웃) */
-  /* Chrome Print Engine의 Flex 계산 오류를 방지하기 위해 인라인 블록 방식을 사용합니다. */
-  .theme-doc-markdown .row {
-    display: block !important;
-    width: 100% !important;
-    font-size: 0 !important; /* 인라인 블록 사이의 여백 제거 */
-    margin: 24px 0 !important;
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-    text-align: left !important;
-  }
-
-  .theme-doc-markdown .col {
-    display: inline-block !important;
-    vertical-align: top !important;
-    font-size: 11pt !important; /* 폰트 크기 복구 */
-    box-sizing: border-box !important;
-    padding-right: 12px !important;
-    flex: none !important;
-    max-width: none !important;
-  }
-
-  /* 3컬럼 고정 폭 */
-  .theme-doc-markdown .col--4 {
-    width: 33.333% !important;
-  }
-
-  /* 2컬럼 고정 폭 */
-  .theme-doc-markdown .col--6 {
-    width: 50% !important;
-  }
-
-  /* 핵심 문서 영역 */
-  article,
-  .theme-doc-markdown,
-  .markdown {
-    display: block !important;
-    width: auto !important;
-    max-width: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
+  /* 핵심 문서 본문 영역 (A4 가용 폭 정밀 고정) */
+  .theme-doc-markdown {
+    width: 178mm !important; /* 210mm - 좌우 여백 */
+    max-width: 178mm !important;
+    margin: 0 auto !important;
+    padding: 16mm 0 !important; /* 상하 여백 */
     background: white !important;
+    box-shadow: none !important;
+    border: none !important;
     overflow: visible !important;
   }
 
-  /* 4. 인쇄용 타이포그래피 (pt 단위 사용) */
-  .theme-doc-markdown h1 { font-size: 28pt !important; margin-top: 0 !important; margin-bottom: 20pt !important; color: #0a2463 !important; }
-  .theme-doc-markdown h2 { font-size: 20pt !important; margin-top: 24pt !important; margin-bottom: 12pt !important; color: #0a2463 !important; border-left: 5px solid #f59e0b !important; padding-left: 10pt !important; break-after: avoid-page; page-break-after: avoid; display: block !important; }
-  .theme-doc-markdown h3 { font-size: 16pt !important; margin-top: 18pt !important; margin-bottom: 10pt !important; color: #1e3a8a !important; break-after: avoid-page; page-break-after: avoid; display: block !important; }
-
-  .markdown p, .theme-doc-markdown p, .markdown li, .theme-doc-markdown li {
-    font-size: 11pt !important;
-    line-height: 1.7 !important;
-    color: #111 !important;
-    margin-bottom: 10pt !important;
-  }
-
-  /* 페이지 중간 잘림 방지 */
-  blockquote, table, pre, img, li, .brochureHero {
+  /* 브로슈어 전용 독립 컬럼 시스템 (전용 Flex 레이아웃) */
+  .brochure-columns-2,
+  .brochure-columns-3 {
+    display: flex !important;
+    width: 100% !important;
+    gap: 16px !important;
+    margin: 24px 0 !important;
+    align-items: flex-start !important;
     break-inside: avoid !important;
     page-break-inside: avoid !important;
   }
 
-  /* 이미지 및 코드 블록 최적화 */
+  .brochure-columns-2 .brochure-col,
+  .brochure-columns-3 .brochure-col {
+    flex: 1 1 0 !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+
+  .brochure-col {
+    display: block !important;
+    box-sizing: border-box !important;
+    font-size: 11pt !important;
+    overflow-wrap: break-word !important;
+  }
+
+  /* 타이포그래피 최적화 */
+  .theme-doc-markdown h1 { font-size: 28pt !important; margin-top: 0 !important; margin-bottom: 20pt !important; color: #0a2463 !important; }
+  .theme-doc-markdown h2 { font-size: 20pt !important; margin-top: 24pt !important; margin-bottom: 12pt !important; color: #0a2463 !important; border-left: 5px solid #f59e0b !important; padding-left: 10pt !important; break-after: avoid-page; page-break-after: avoid; display: block !important; }
+  .theme-doc-markdown h3 { font-size: 16pt !important; margin-top: 18pt !important; margin-bottom: 10pt !important; color: #1e3a8a !important; break-after: avoid-page; page-break-after: avoid; display: block !important; }
+  .markdown p, .theme-doc-markdown p, .markdown li, .theme-doc-markdown li { font-size: 11pt !important; line-height: 1.7 !important; color: #111 !important; margin-bottom: 10pt !important; }
+
+  /* 페이지 잘림 방지 */
+  blockquote, table, pre, img, li, .brochureHero { break-inside: avoid !important; page-break-inside: avoid !important; }
   img { max-width: 100% !important; height: auto !important; border-radius: 8px !important; }
   pre { overflow: hidden !important; white-space: pre-wrap !important; word-break: break-all !important; border: 1px solid #e2e8f0 !important; padding: 10pt !important; }
   a::after { content: "" !important; }
