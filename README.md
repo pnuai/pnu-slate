@@ -6,6 +6,8 @@
 [![React](https://img.shields.io/badge/React-19.0.0-blue.svg)](https://react.dev/)
 
 > **서비스 링크: [https://pnuai.github.io](https://pnuai.github.io)**
+>
+> 📖 **[사용자 가이드 (운영 매뉴얼) 바로가기](./USER_GUIDE.md)**
 
 PNU Slate는 부산대학교 AI융합교육원의 다양한 교육 프로그램을 체계적으로 관리하고 배포하기 위한 통합 디지털 브로슈어 플랫폼입니다. Docusaurus 기반의 정적 사이트 생성(SSG) 기술과 Git 기반의 무설치형 Web CMS를 결합하여 개발 생산성과 운영 편의성을 동시에 제공합니다.
 
@@ -123,14 +125,6 @@ pnu-slate/
 ├── docusaurus.config.js  # 글로벌 환경 설정 및 플러그인 관리
 └── sidebars.js           # 문서 계층 및 탐색(Navigation) 규칙 정의
 ```
-
----
-
-## 사용자 가이드
-
-웹 CMS 사용법, GitHub 토큰 설정 방법, 디자인 템플릿 활용법 등 일반 사용자를 위한 상세 안내는 아래 가이드북을 참고하세요.
-
-👉 **[USER_GUIDE.md (사용자 가이드 바로가기)](./USER_GUIDE.md)**
 
 ---
 
