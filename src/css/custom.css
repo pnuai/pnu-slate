@@ -744,8 +744,8 @@ main .col--3 {
 }
 
 /* =========================================
-   PNU Slate Print System v2
-   (안정적인 A4 브로슈어 출력 시스템)
+   PNU Slate Print System v3 (MDX Aware)
+   (웹 UI는 제거하고 브로슈어 레이아웃은 보존)
    ========================================= */
 
 @media print {
@@ -762,7 +762,7 @@ main .col--3 {
     margin: 0 !important;
   }
 
-  /* 불필요한 웹 UI 요소 완전 제거 */
+  /* 1. 불필요한 웹 UI 요소 완전 제거 */
   .navbar,
   .theme-doc-sidebar-container,
   .table-of-contents,
@@ -780,23 +780,46 @@ main .col--3 {
     display: none !important;
   }
 
-  /* Docusaurus 레이아웃 강제 초기화 (all: unset으로 웹 그리드 제거) */
+  /* 2. Docusaurus 레이아웃 초기화 (MDX Flex/Grid는 유지) */
   .main-wrapper,
   .container,
-  .row,
   main,
   div[class*="docItemCol_"],
   div[class*="docItemContainer_"] {
-    all: unset !important;
     display: block !important;
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
     background: white !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
-  /* 핵심 문서 영역 (순수 블록 구조) */
+  /* 3. MDX 레이아웃 컴포넌트 보존 (컬럼 붕괴 방지) */
+  .columns,
+  .row,
+  .grid,
+  [class*="column"],
+  .brochureHero {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important; /* 인쇄 시 줄바꿈 방지 */
+    gap: 24px !important;
+    width: 100% !important;
+    align-items: flex-start !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* 컬럼 내부 요소 비율 조정 */
+  [class*="column"] > *,
+  .col > * {
+    flex: 1 1 0 !important;
+    min-width: 0 !important; /* 컨테이너 탈출 방지 */
+  }
+
+  /* 핵심 문서 영역 */
   article,
   .theme-doc-markdown,
   .markdown {
@@ -806,13 +829,10 @@ main .col--3 {
     margin: 0 !important;
     padding: 0 !important;
     background: white !important;
-    box-shadow: none !important;
-    border: none !important;
-    border-radius: 0 !important;
     overflow: visible !important;
   }
 
-  /* 인쇄용 고품격 타이포그래피 (pt 단위 사용) */
+  /* 4. 인쇄용 타이포그래피 (pt 단위 사용) */
   .theme-doc-markdown h1 {
     font-size: 28pt !important;
     margin-top: 0 !important;
@@ -852,36 +872,31 @@ main .col--3 {
     margin-bottom: 10pt !important;
   }
 
-  /* 페이지 중간 잘림 방지 (핵심 요소 보호) */
-  h1, h2, h3, h4,
+  /* 페이지 중간 잘림 방지 */
   blockquote,
   table,
   pre,
   img,
-  .brochureHero,
   li {
     break-inside: avoid !important;
     page-break-inside: avoid !important;
   }
 
-  /* 이미지 최적화 */
+  /* 이미지 및 코드 블록 최적화 */
   img {
     max-width: 100% !important;
     height: auto !important;
     border-radius: 8px !important;
   }
 
-  /* 코드 블록 (잘림 방지 및 자동 줄바꿈) */
   pre {
     overflow: hidden !important;
     white-space: pre-wrap !important;
     word-break: break-all !important;
     border: 1px solid #e2e8f0 !important;
     padding: 10pt !important;
-    background: #f8fafc !important;
   }
 
-  /* 링크 URL 자동 출력 제거 */
   a::after {
     content: "" !important;
   }
