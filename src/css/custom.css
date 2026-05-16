@@ -766,26 +766,48 @@ main .col--3 {
 /* 목차(TOC) 클릭 시 헤더에 가려지지 않도록 스크롤 위치 보정 (표준 방식) */
 
 /* =========================================
-   [긴급] 제목 가시성 복구 (h2, h3 강제 노출)
+   [긴급] 제목 렌더링 및 앵커 충돌 복구
    ========================================= */
+
+/* 제목 텍스트 강제 노출 및 텍스트 밀림(text-indent) 방지 */
 .theme-doc-markdown h2,
 .markdown h2,
 .toastui-editor-contents h2 {
-  color: #111 !important;
-  opacity: 1 !important;
   display: block !important;
   visibility: visible !important;
-  min-height: auto !important;
-  height: auto !important;
+  opacity: 1 !important;
+  color: #222 !important;
+  font-size: 2.2rem !important;
+  font-weight: 800 !important;
+  text-indent: 0 !important;
 }
 
 .theme-doc-markdown h3,
 .markdown h3,
 .toastui-editor-contents h3 {
-  color: #222 !important;
-  opacity: 1 !important;
   display: block !important;
   visibility: visible !important;
-  min-height: auto !important;
-  height: auto !important;
+  opacity: 1 !important;
+  color: #222 !important;
+  font-size: 1.8rem !important;
+  font-weight: 700 !important;
+  text-indent: 0 !important;
+}
+
+/* 깨진 앵커(hash-link) 동작 강제 중단 */
+.theme-doc-markdown .hash-link,
+.markdown .hash-link,
+.toastui-editor-contents .hash-link {
+  display: none !important;
+}
+
+/* 가상 요소(::before, ::after)에 의한 강제 기호 노출 차단 */
+.theme-doc-markdown h2::before,
+.theme-doc-markdown h3::before,
+.markdown h2::before,
+.markdown h3::before,
+.toastui-editor-contents h2::before,
+.toastui-editor-contents h3::before {
+  display: none !important;
+  content: none !important;
 }
