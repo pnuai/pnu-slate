@@ -536,6 +536,8 @@ async function injectCustomCSS() {
     
     // Docusaurus 본문 클래스를 Toast UI 미리보기 클래스로 치환
     css = css.replace(/\.theme-doc-markdown/g, '.toastui-editor-contents');
+    css = css.replace(/\.markdown/g, '.toastui-editor-contents');
+    
     const style = document.createElement('style');
     style.id = 'injected-custom-css';
     style.innerHTML = css;
