@@ -1,10 +1,9 @@
 ---
 id: template
-title: "템플릿 및 컴포넌트 가이드"
+title: 템플릿 및 컴포넌트 가이드
 sidebar_position: 99
 theme: blue
 ---
-
 <style>{`
   :root {
     --navy: #0b1f45;
@@ -266,4 +265,4 @@ theme: blue
 ### 💡 사용 방법
 1. 위 코드를 복사(Ctrl+C)합니다.
 2. 관리자 페이지(`우측 상단 톱니바퀴` -> `새 문서 작성`)를 엽니다.
-3. `Markdown` 탭에 붙여넣기(Ctrl+V) 한 뒤, 원하는 텍스트만 쏙쏙 바꿔서 사용하세요!
+3. `Markdown` 탭에 붙여넣기(Ctrl+V) 한 뒤, 원하는 텍스트만 쏙쏙 바꿔서 사용하세요! 
