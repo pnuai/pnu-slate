@@ -145,18 +145,6 @@
   #toast-editor{flex:1;min-height:0;margin-bottom:20px;border-radius:12px;overflow:hidden;border:1px solid var(--gray-200)}
   .toastui-editor-defaultUI{border:none !important;height:100% !important}
 
-  /* SPINNER */
-  @keyframes spin{to{transform:rotate(360deg)}}
-
-  /* 에디터 미리보기 제목 강제 복구 스타일 (Nuclear Option) */
-  .toastui-editor-contents h1 { font-size: 3rem !important; font-weight: 800 !important; color: #0a2463 !important; display: block !important; margin-top: 2rem !important; margin-bottom: 1.5rem !important; line-height: 1.2 !important; }
-  .toastui-editor-contents h2 { font-size: 2.2rem !important; font-weight: 800 !important; color: #0a2463 !important; border-left: 6px solid #f59e0b !important; padding-left: 1rem !important; display: block !important; margin-top: 3rem !important; margin-bottom: 1.2rem !important; line-height: 1.3 !important; }
-  .toastui-editor-contents h3 { font-size: 1.7rem !important; font-weight: 700 !important; color: #1e3a8a !important; display: block !important; margin-top: 2rem !important; margin-bottom: 1rem !important; line-height: 1.4 !important; }
-  .toastui-editor-contents h4 { font-size: 1.3rem !important; font-weight: 600 !important; color: #444 !important; display: block !important; line-height: 1.5 !important; }
-  .toastui-editor-contents ul, .toastui-editor-contents ol { padding-left: 1.8rem !important; display: block !important; margin-bottom: 1.2rem !important; }
-  .toastui-editor-contents li { display: list-item !important; margin-bottom: 0.5rem !important; }
-  .toastui-editor-contents blockquote { border-left: 5px solid #e2e8f0 !important; padding: 1rem 1.5rem !important; background: #f8fafc !important; display: block !important; color: #64748b !important; margin: 1.5rem 0 !important; }
-  .toastui-editor-contents .hash-link { display: none !important; }
 </style>
 </head>
 <body>
@@ -489,108 +477,49 @@ function initEditor() {
   toastEditor = new toastui.Editor({
     el: document.querySelector('#toast-editor'),
     height: '100%',
-    initialEditType: 'markdown', // 브로슈어 편집을 위해 기본을 마크다운으로 변경
-    previewStyle: 'tab',
+    initialEditType: 'markdown',
+    previewStyle: 'vertical',
     language: 'ko-KR',
-    hideModeSwitch: false,
-    events: {
-      change: updateMDXPreviewStyles
-    }
+    usageStatistics: false,
+    toolbarItems: [
+      ['heading', 'bold', 'italic', 'strike'],
+      ['hr', 'quote'],
+      ['ul', 'ol', 'task', 'indent', 'outdent'],
+      ['table', 'image', 'link'],
+      ['code', 'codeblock']
+    ]
   });
-  
-  injectCustomCSS();
+  loadPreviewCSS();
 }
 
-/* 마크다운 본문에 포함된 MDX <style>{`...`}</style> 코드를 추출하여 미리보기에 실시간 적용 */
-function updateMDXPreviewStyles() {
-  if (!toastEditor) return;
-  const md = toastEditor.getMarkdown();
-  
-  // MDX 스타일 정규식 매칭 (<style>{` ... `}</style> 형태)
-  const match = md.match(/<style>\s*(?:\{`|\{)?([\s\S]*?)(?:`\}|\})?\s*<\/style>/);
-  
-  let styleEl = document.getElementById('dynamic-mdx-style');
-  if (!styleEl) {
-    styleEl = document.createElement('style');
-    styleEl.id = 'dynamic-mdx-style';
-    document.head.appendChild(styleEl);
-  }
-  
-  if (match && match[1]) {
-    styleEl.innerHTML = match[1];
-  } else {
-    styleEl.innerHTML = '';
-  }
-}
-
-/* 실제 홈페이지의 디자인(custom.css)을 미리보기 화면에 완벽하게 적용하는 함수 */
-async function injectCustomCSS() {
-  try {
-    let css = "";
-    
-    // 로컬 환경이면 로컬 파일을, 아니면 GitHub 파일을 가져옴
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      const r = await fetch('/css/custom.css');
-      if (r.ok) css = await r.text();
-    } else {
-      const r = await ghFetch(`/repos/${ORG}/${REPO}/contents/src/css/custom.css?t=${Date.now()}`);
-      if (r.ok) {
-        const d = await r.json();
-        css = decodeURIComponent(escape(atob(d.content)));
+    // [NEW] 미리보기 전용 Typography 스타일 로드
+    async function loadPreviewCSS() {
+      try {
+        let css = "";
+        // 로컬/GitHub 구분하여 preview.css 로드
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          const r = await fetch('/css/preview.css');
+          if (r.ok) css = await r.text();
+        } else {
+          const r = await ghFetch(`/repos/${ORG}/${REPO}/contents/src/css/preview.css?t=${Date.now()}`);
+          if (r.ok) {
+            const d = await r.json();
+            css = decodeURIComponent(escape(atob(d.content)));
+          }
+        }
+        
+        if (css) {
+          const style = document.createElement('style');
+          style.id = 'preview-typography-css';
+          style.innerHTML = css;
+          const oldStyle = document.getElementById('preview-typography-css');
+          if (oldStyle) oldStyle.remove();
+          document.head.appendChild(style);
+        }
+      } catch (e) {
+        console.error("preview.css 로드 실패:", e);
       }
     }
-
-    
-    if (!css) return;
-    
-    // Docusaurus 본문 클래스를 Toast UI 미리보기 클래스로 치환
-    css = css.replace(/\.theme-doc-markdown/g, '.toastui-editor-contents');
-    css = css.replace(/\.markdown/g, '.toastui-editor-contents');
-    
-    // 최종 Typography 강제 Override (사용자 지시사항 반영)
-    css += `
-      .toastui-editor-contents h1 {
-        font-size: 3rem !important;
-        font-weight: 800 !important;
-        color: #0a2463 !important;
-        line-height: 1.2 !important;
-        display: block !important;
-      }
-      .toastui-editor-contents h2 {
-        font-size: 2.2rem !important;
-        font-weight: 800 !important;
-        color: #111827 !important;
-        margin-top: 2rem !important;
-        margin-bottom: 1rem !important;
-        line-height: 1.3 !important;
-        display: block !important;
-      }
-      .toastui-editor-contents h3 {
-        font-size: 1.7rem !important;
-        font-weight: 700 !important;
-        color: #1f2937 !important;
-        margin-top: 1.5rem !important;
-        margin-bottom: 0.75rem !important;
-        line-height: 1.4 !important;
-        display: block !important;
-      }
-      .toastui-editor-contents h4 {
-        font-size: 1.3rem !important;
-        font-weight: 600 !important;
-        display: block !important;
-      }
-    `;
-    
-    const style = document.createElement('style');
-    style.id = 'injected-custom-css';
-    style.innerHTML = css;
-    const oldStyle = document.getElementById('injected-custom-css');
-    if (oldStyle) oldStyle.remove();
-    document.head.appendChild(style);
-  } catch(e) {
-    console.error("미리보기용 custom.css 로드 실패:", e);
-  }
-}
 
 /* ─── 새 문서 작성(모달) ─── */
 window.openCreateModal = () => {
