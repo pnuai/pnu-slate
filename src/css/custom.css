@@ -764,6 +764,28 @@ main .col--3 {
 }
 
 /* 목차(TOC) 클릭 시 헤더에 가려지지 않도록 스크롤 위치 보정 (표준 방식) */
-h2, h3, h4 {
-  scroll-margin-top: 100px;
+
+/* =========================================
+   [긴급] 제목 가시성 복구 (h2, h3 강제 노출)
+   ========================================= */
+.theme-doc-markdown h2,
+.markdown h2,
+.toastui-editor-contents h2 {
+  color: #111 !important;
+  opacity: 1 !important;
+  display: block !important;
+  visibility: visible !important;
+  min-height: auto !important;
+  height: auto !important;
+}
+
+.theme-doc-markdown h3,
+.markdown h3,
+.toastui-editor-contents h3 {
+  color: #222 !important;
+  opacity: 1 !important;
+  display: block !important;
+  visibility: visible !important;
+  min-height: auto !important;
+  height: auto !important;
 }
