@@ -545,21 +545,32 @@ async function injectCustomCSS() {
     // 제목이 투명해지거나 사라지는 현상을 원천 차단하는 강제 스타일 주입
     css += `\n.toastui-editor-contents h1, .toastui-editor-contents h2, .toastui-editor-contents h3 { border: 3px solid red !important; background: yellow !important; color: black !important; display: block !important; visibility: visible !important; opacity: 1 !important; min-height: 50px !important; }`;
     
-    // 미리보기 내부의 태그 종류 및 실제 HTML 소스 분석
-    setTimeout(() => {
+    // 제목(h2, h3) 실시간 강제 노출 엔진 (MutationObserver)
+    const observer = new MutationObserver(() => {
       const contentsEl = document.querySelector('.toastui-editor-contents');
+      if (!contentsEl) return;
       
-      // 자바스크립트로 숨겨진 제목들을 강제로 노출 (인라인 스타일 제거)
       contentsEl.querySelectorAll('h2, h3').forEach(el => {
         el.style.setProperty('display', 'block', 'important');
         el.style.setProperty('opacity', '1', 'important');
         el.style.setProperty('visibility', 'visible', 'important');
+        el.style.setProperty('color', 'white', 'important');
+        el.style.setProperty('background', 'purple', 'important');
+        el.style.setProperty('border', '5px solid black', 'important');
+        el.style.setProperty('min-height', '60px', 'important');
       });
+    });
 
+    const target = document.querySelector('.toastui-editor-contents');
+    if (target) {
+      observer.observe(target, { childList: true, subtree: true });
+    }
+
+    // 미리보기 내부의 태그 종류 및 실제 HTML 소스 분석
+    setTimeout(() => {
+      const contentsEl = document.querySelector('.toastui-editor-contents');
       const tags = Array.from(contentsEl.querySelectorAll('*')).map(el => el.tagName.toLowerCase());
       const uniqueTags = [...new Set(tags)];
-      
-      // 실제 렌더링된 HTML 소스(앞부분 200자)를 화면에 노출
       const rawHTML = contentsEl.innerHTML.replace(/</g, '&lt;').replace(/>/g, '&gt;').substring(0, 300);
       document.getElementById('debug-status').innerText += ` | 태그: ${uniqueTags.join(', ')} | 소스: ${rawHTML}...`;
     }, 500);
