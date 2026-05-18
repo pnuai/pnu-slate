@@ -1,9 +1,9 @@
 ---
 id: part-4
-title: "교육환경 개선 및 성과 모니터링"
+title: 교육환경 개선 및 성과 모니터링
 sidebar_position: 4
+theme: blue
 ---
-
 <style>{`
   :root {
     --navy:   #0d1e42;
@@ -270,7 +270,7 @@ sidebar_position: 4
 
 
 
-## 교육 인프라 6대 구성요소
+
 
 <div class="wrap">
   <div class="sec-head au"><div class="sec-num">01</div><h2>교육 인프라 6대 구성요소</h2></div>
