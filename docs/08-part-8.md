@@ -1,9 +1,9 @@
 ---
 id: part-8
-title: "대학 일반 현황"
+title: 대학 일반 현황
 sidebar_position: 8
+theme: blue
 ---
-
 <style>{`
   :root {
     --navy:   #0b1d40;
@@ -215,53 +215,53 @@ sidebar_position: 8
   <div class="sec-head au"><div class="sec-num">01</div><h2>AI·SW 학과 구조 및 모집 정원</h2></div>
   <div class="dept-structure">
 
-    <div class="dept-group au d1">
-      <div class="dept-group-head dgh1">
-        정보컴퓨터공학부
-        <span class="quota">주관 학부</span>
-      </div>
-      <div class="dept-majors">
-        <div class="dept-major">
-          <div class="dm-name">컴퓨터공학전공</div>
-          <div class="dm-quota">84<small>명</small></div>
-          <div class="dm-note">SW 전공 핵심 학과</div>
-        </div>
-        <div class="dept-major">
-          <div class="dm-name">인공지능전공 <sup>①</sup></div>
-          <div class="dm-quota">60<small>명</small></div>
-          <div class="dm-note">경북대학교 전자공학부 인공지능전공과<br /><strong>공동학과</strong>로 운영 (전국 최초)</div>
-        </div>
-        <div class="dept-major">
-          <div class="dm-name">디자인테크놀로지전공</div>
-          <div class="dm-quota">17<small>명</small></div>
-          <div class="dm-note">디자인 + 디지털 기술 융합 전공</div>
-        </div>
-        <div class="dept-major">
-          <div class="dm-name">첨단IT자율전공 <sup>③</sup></div>
-          <div class="dm-quota">-</div>
-          <div class="dm-note">전공배정 시 정보컴퓨터공학부 선택 가능</div>
-        </div>
-      </div>
+<div class="dept-group au d1">
+  <div class="dept-group-head dgh1">
+    정보컴퓨터공학부
+    <span class="quota">주관 학부</span>
+  </div>
+  <div class="dept-majors">
+    <div class="dept-major">
+      <div class="dm-name">컴퓨터공학전공</div>
+      <div class="dm-quota">84<small>명</small></div>
+      <div class="dm-note">SW 전공 핵심 학과</div>
     </div>
+    <div class="dept-major">
+      <div class="dm-name">인공지능전공 <sup>①</sup></div>
+      <div class="dm-quota">60<small>명</small></div>
+      <div class="dm-note">경북대학교 전자공학부 인공지능전공과<br /><strong>공동학과</strong>로 운영 (전국 최초)</div>
+    </div>
+    <div class="dept-major">
+      <div class="dm-name">디자인테크놀로지전공</div>
+      <div class="dm-quota">17<small>명</small></div>
+      <div class="dm-note">디자인 + 디지털 기술 융합 전공</div>
+    </div>
+    <div class="dept-major">
+      <div class="dm-name">첨단IT자율전공 <sup>③</sup></div>
+      <div class="dm-quota">-</div>
+      <div class="dm-note">전공배정 시 정보컴퓨터공학부 선택 가능</div>
+    </div>
+  </div>
+</div>
 
-    <div class="dept-group au d2">
-      <div class="dept-group-head dgh2">
-        의생명융합공학부
-        <span class="quota">협력 학부</span>
-      </div>
-      <div class="dept-majors">
-        <div class="dept-major">
-          <div class="dm-name">데이터사이언스전공 <sup>②</sup></div>
-          <div class="dm-quota">44<small>명</small></div>
-          <div class="dm-note">전공배정 시 44명 선택 가능<br />(의생명융합공학부 입학정원 108명 기준)</div>
-        </div>
-        <div class="dept-major">
-          <div class="dm-name">의생명융합공학부 자율전공</div>
-          <div class="dm-quota">108<small>명</small></div>
-          <div class="dm-note">입학 후 전공 배정</div>
-        </div>
-      </div>
+<div class="dept-group au d2">
+  <div class="dept-group-head dgh2">
+    의생명융합공학부
+    <span class="quota">협력 학부</span>
+  </div>
+  <div class="dept-majors">
+    <div class="dept-major">
+      <div class="dm-name">데이터사이언스전공 <sup>②</sup></div>
+      <div class="dm-quota">44<small>명</small></div>
+      <div class="dm-note">전공배정 시 44명 선택 가능<br />(의생명융합공학부 입학정원 108명 기준)</div>
     </div>
+    <div class="dept-major">
+      <div class="dm-name">의생명융합공학부 자율전공</div>
+      <div class="dm-quota">108<small>명</small></div>
+      <div class="dm-note">입학 후 전공 배정</div>
+    </div>
+  </div>
+</div>
 
   </div>
   <div style={{marginTop: '14px', padding: '14px 18px', background: 'white', borderRadius: '10px', borderLeft: '4px solid var(--gold)', boxShadow: '0 1px 8px rgba(11,29,64,.06)', fontSize: '12px', color: 'var(--gray)'}}>
