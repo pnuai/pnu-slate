@@ -2,20 +2,20 @@
 const chapters =
 [
   {
-    "id": "intro",
-    "title": "대학 소개 및 운영 방향",
-    "description": "",
-    "theme": "gray",
-    "link": "/docs/intro",
-    "sidebar_position": 1
-  },
-  {
     "id": "part-2",
     "title": "교육목표 및 혁신노력",
     "description": "",
-    "theme": "gray",
+    "theme": "blue",
     "link": "/docs/part-2",
-    "sidebar_position": 2
+    "sidebar_position": 1
+  },
+  {
+    "id": "intro",
+    "title": "대학 소개 및 운영 방향",
+    "description": "",
+    "theme": "blue",
+    "link": "/docs/intro",
+    "sidebar_position": 1
   },
   {
     "id": "part-3",
@@ -29,7 +29,7 @@ const chapters =
     "id": "part-4",
     "title": "교육환경 개선 및 성과 모니터링",
     "description": "",
-    "theme": "gray",
+    "theme": "blue",
     "link": "/docs/part-4",
     "sidebar_position": 4
   },

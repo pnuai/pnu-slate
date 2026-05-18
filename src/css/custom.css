@@ -872,3 +872,36 @@ main .col--3 {
 .preview-iframe {
   transition: opacity 0.3s ease;
 }
+
+/* =========================================
+   Duplicate Heading Suppression
+   ========================================= */
+/* 목차(TOC) 데이터 추출을 위한 마크다운 표준 H2/H3가 커스텀 디자인 제목 블록(.wrap, .sec-head, section)과
+   연달아 쓰였을 때, 본문 영역에서 표준 제목이 중복 노출되는 문제를 완벽히 감춤 */
+.theme-doc-markdown h2 + .wrap,
+.theme-doc-markdown h2 + .sec-head,
+.theme-doc-markdown h2 + section,
+.theme-doc-markdown h3 + .wrap,
+.theme-doc-markdown h3 + .sec-head,
+.theme-doc-markdown h3 + section {
+  margin-top: -2.5rem !important;
+}
+
+.theme-doc-markdown > h2:has(+ .wrap),
+.theme-doc-markdown > h2:has(+ .sec-head),
+.theme-doc-markdown > h2:has(+ section .section-title),
+.theme-doc-markdown > h2:has(+ section .sec-head),
+.theme-doc-markdown > h3:has(+ .wrap),
+.theme-doc-markdown > h3:has(+ .sec-head),
+.theme-doc-markdown > h3:has(+ section .section-title),
+.theme-doc-markdown > h3:has(+ section .sec-head) {
+  height: 1px !important;
+  margin-top: -1px !important;
+  margin-bottom: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  opacity: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+

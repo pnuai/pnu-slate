@@ -33,7 +33,7 @@ const firstDocLink = dynamicNavItems.length > 0 ? dynamicNavItems[0].to : '/docs
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: "2026 AI 교육 안내서",
+  title: "부산대학교 SW중심대학 2026",
   
   customFields: {
     firstDocLink,
@@ -103,11 +103,11 @@ const config = {
     },
 
     navbar: {
-      title: "AI융합교육원",
+      title: "",
 
       logo: {
         alt: "PNU Logo",
-        src: "img/logo.jpg",
+        src: "img/logo.png",
       },
 
       items: [

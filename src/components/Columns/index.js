@@ -15,6 +15,14 @@ import React from 'react';
  * </Columns>
  */
 export default function Columns({ children, gap = '32px' }) {
+  const validChildren = React.Children.toArray(children)
+    .filter(child => {
+      if (typeof child === 'string') {
+        return child.trim() !== '';
+      }
+      return true;
+    });
+
   return (
     <div
       style={{
@@ -25,15 +33,18 @@ export default function Columns({ children, gap = '32px' }) {
         alignItems: 'stretch',
       }}
     >
-      {React.Children.map(children, (child) => {
+      {validChildren.map((child, index) => {
         if (!child) return null;
         return (
-          <div style={{ 
-            flex: '1 1 300px', // 최소 300px 확보 후 남은 공간 채움
-            minWidth: 0,
-            display: 'flex',
-            flexDirection: 'column'
-          }}>
+          <div 
+            key={index}
+            style={{ 
+              flex: '1 1 300px', // 최소 300px 확보 후 남은 공간 채움
+              minWidth: 0,
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
             {child}
           </div>
         );

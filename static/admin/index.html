@@ -564,19 +564,78 @@ async function loadDocs() {
   const el = document.getElementById('docs-list');
   el.innerHTML = '<span class="doc-empty">로딩 중…</span>';
   try {
-    const r = await ghFetch(`/repos/${ORG}/${REPO}/contents/docs`);
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const data = await r.json();
-    const mds = data.filter(f => f.name.endsWith('.md')).sort((a,b)=>a.name.localeCompare(b.name));
+    // 1. Git Trees API를 통해 브랜치의 절대 최신 파일 트리구조 실시간 조회 (완벽 캐시 우회)
+    const treeRes = await ghFetch(`/repos/${ORG}/${REPO}/git/trees/${BRANCH}?recursive=1`);
+    if (!treeRes.ok) throw new Error('Git Tree API 호출 실패: ' + treeRes.status);
+    const treeData = await treeRes.json();
+    
+    // docs/ 폴더 아래의 .md 파일들 필터링 및 매핑
+    const mds = treeData.tree
+      .filter(item => item.path.startsWith('docs/') && item.path.endsWith('.md'))
+      .map(item => ({
+        name: item.path.substring('docs/'.length),
+        path: item.path,
+        sha: item.sha,
+        size: item.size
+      }));
+    
     if (!mds.length) { el.innerHTML = '<span class="doc-empty">docs/ 폴더에 .md 파일이 없습니다.</span>'; return; }
-    el.innerHTML = mds.map(f => `
-      <div class="doc-item">
-        <span class="doc-icon">📄</span>
-        <span class="doc-name">${f.name}</span>
-        <span class="doc-sha">${f.sha.slice(0,7)}</span>
-        <button class="btn btn-outline btn-sm" onclick="openEditModal('${f.name}','${f.sha}')">수정</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteFile('${f.name}','${f.sha}')">삭제</button>
-      </div>`).join('');
+    
+    // 2. 각 파일의 고유 blob SHA를 통해 원본 파일 내용을 100% 무결하게 실시간 병렬 로드
+    const docsData = await Promise.all(mds.map(async f => {
+      try {
+        const blobRes = await ghFetch(`/repos/${ORG}/${REPO}/git/blobs/${f.sha}`);
+        if (!blobRes.ok) return { ...f, sidebar_position: 999, content: '', rawData: f };
+        const blobData = await blobRes.json();
+        
+        // Base64 디코딩 (UTF-8 완벽 지원)
+        const text = decodeURIComponent(escape(atob(blobData.content)));
+        
+        // 프론트매터의 sidebar_position 파싱
+        const match = text.match(/sidebar_position:\s*(\d+)/);
+        const pos = match ? parseInt(match[1], 10) : 999;
+        return { ...f, sidebar_position: pos, content: text, rawData: f };
+      } catch (err) {
+        console.warn(`Blob 로드 실패 (${f.name}):`, err);
+        return { ...f, sidebar_position: 999, content: '', rawData: f };
+      }
+    }));
+    
+    // sidebar_position 기준으로 오름차순 정렬 (유저님이 수정한 '순서' 값 완벽 동기화)
+    docsData.sort((a, b) => a.sidebar_position - b.sidebar_position);
+    window.currentDocsList = docsData; // 순서 조정을 위해 글로벌 캐싱
+    
+    el.innerHTML = docsData.map((f, index) => {
+      const isFirst = index === 0;
+      const isLast = index === docsData.length - 1;
+      
+      const upButton = isFirst 
+        ? `<button class="btn btn-outline btn-sm" disabled style="opacity: 0.3; cursor: not-allowed; padding: 2px 8px; font-size: 11px;">▲</button>`
+        : `<button class="btn btn-outline btn-sm" onclick="swapFilesByIndex(${index}, ${index - 1})" style="padding: 2px 8px; font-size: 11px; color: var(--blue); font-weight: bold; border-color: var(--blue);">▲</button>`;
+        
+      const downButton = isLast
+        ? `<button class="btn btn-outline btn-sm" disabled style="opacity: 0.3; cursor: not-allowed; padding: 2px 8px; font-size: 11px;">▼</button>`
+        : `<button class="btn btn-outline btn-sm" onclick="swapFilesByIndex(${index}, ${index + 1})" style="padding: 2px 8px; font-size: 11px; color: var(--blue); font-weight: bold; border-color: var(--blue);">▼</button>`;
+      
+      const displayPos = f.sidebar_position === 999 ? '미지정' : f.sidebar_position;
+      
+      return `
+      <div class="doc-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: white; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid var(--border);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span class="doc-icon" style="font-size: 16px;">📄</span>
+          <span class="doc-name" style="font-weight: 600; color: var(--navy); font-size: 13px;">${f.name}</span>
+          <span class="doc-sha" style="font-size: 11px; color: var(--blue); background: var(--light); padding: 2px 6px; border-radius: 4px; font-family: monospace;">${f.sha.slice(0,7)}</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span style="font-size: 12px; color: var(--gray); font-weight: 500; margin-right: 4px;">순서 (${displayPos}):</span>
+          ${upButton}
+          ${downButton}
+          <div style="width: 1px; height: 16px; background: var(--border); margin: 0 6px;"></div>
+          <button class="btn btn-outline btn-sm" onclick="openEditModal('${f.name}','${f.sha}')">수정</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteFile('${f.name}','${f.sha}')">삭제</button>
+        </div>
+      </div>`;
+    }).join('');
   } catch(e) {
     if (e.message.includes('404')) {
       el.innerHTML = `<span style="color:var(--gray-500);font-size:.85rem">⚠️ 레포지토리가 존재하지 않거나, 아직 파일이 하나도 없습니다.<br>GitHub에서 템플릿으로 레포지토리를 생성한 후 시도해주세요.</span>`;
@@ -611,10 +670,228 @@ window.deleteFile = async (name, sha) => {
   }
 };
 
+/* ─── 순서 교환 GUI 엔진 (GitHub 파일 쌍 정밀 스왑) ─── */
+window.swapFilesByIndex = async (idx1, idx2) => {
+  if (!window.currentDocsList || !window.currentDocsList[idx1] || !window.currentDocsList[idx2]) return;
+  const file1 = window.currentDocsList[idx1];
+  const file2 = window.currentDocsList[idx2];
+  await swapFiles(file1, file2);
+};
+
+async function swapFiles(file1, file2) {
+  appendLog(`🔄 "${file1.name}"와 "${file2.name}"의 순서 바꾸는 중…`);
+  const el = document.getElementById('docs-list');
+  el.innerHTML = `<span class="doc-empty" style="color: var(--blue); font-weight: bold;">🔄 문서 순서를 스왑하는 중입니다 (GitHub 동기화)…</span>`;
+  
+  try {
+    // 1. 실시간으로 브랜치의 절대 최신 파일 트리를 다시 조회하여, 최신 SHA 2차 검증 확보 (캐시 0% 우회)
+    const treeRes = await ghFetch(`/repos/${ORG}/${REPO}/git/trees/${BRANCH}?recursive=1`);
+    if (!treeRes.ok) throw new Error('최신 Git Tree 조회 실패');
+    const treeData = await treeRes.json();
+    
+    const fresh1 = treeData.tree.find(item => item.path === `docs/${file1.name}`);
+    const fresh2 = treeData.tree.find(item => item.path === `docs/${file2.name}`);
+    
+    if (!fresh1 || !fresh2) throw new Error('지정한 문서가 GitHub 상에 존재하지 않습니다.');
+    
+    // 2. 100% 캐시 우회되는 최신 Blob API를 호출하여 파일 내용 확보
+    const [blobRes1, blobRes2] = await Promise.all([
+      ghFetch(`/repos/${ORG}/${REPO}/git/blobs/${fresh1.sha}`),
+      ghFetch(`/repos/${ORG}/${REPO}/git/blobs/${fresh2.sha}`)
+    ]);
+    
+    if (!blobRes1.ok || !blobRes2.ok) throw new Error('파일 최신 내용 로드 실패');
+    
+    const [blob1, blob2] = await Promise.all([blobRes1.json(), blobRes2.json()]);
+    
+    let text1 = decodeURIComponent(escape(atob(blob1.content)));
+    let text2 = decodeURIComponent(escape(atob(blob2.content)));
+    
+    // 프론트매터의 sidebar_position 파싱
+    const match1 = text1.match(/sidebar_position:\s*(\d+)/);
+    const match2 = text2.match(/sidebar_position:\s*(\d+)/);
+    
+    let pos1 = match1 ? parseInt(match1[1], 10) : 999;
+    let pos2 = match2 ? parseInt(match2[1], 10) : 999;
+    
+    // 만약 둘 다 순서가 미지정이거나 같다면 기본 정렬 인덱스를 부여
+    if (pos1 === pos2 || pos1 === 999 || pos2 === 999) {
+      const idx1 = window.currentDocsList.findIndex(f => f.name === file1.name);
+      const idx2 = window.currentDocsList.findIndex(f => f.name === file2.name);
+      pos1 = idx1 + 1;
+      pos2 = idx2 + 1;
+    }
+    
+    // 내용 속 sidebar_position 값 맞바꾸기 (앞으로 누락 및 프론트매터 없음 모두 철통 방어)
+    if (text1.match(/sidebar_position:/)) {
+      text1 = text1.replace(/(sidebar_position:\s*)(\d+)/, `$1${pos2}`);
+    } else if (text1.match(/^---\s*([\s\S]*?)---/)) {
+      text1 = text1.replace(/^---\s*\n/, `---\nsidebar_position: ${pos2}\n`);
+    } else {
+      text1 = `---\nsidebar_position: ${pos2}\n---\n\n` + text1;
+    }
+    
+    if (text2.match(/sidebar_position:/)) {
+      text2 = text2.replace(/(sidebar_position:\s*)(\d+)/, `$1${pos1}`);
+    } else if (text2.match(/^---\s*([\s\S]*?)---/)) {
+      text2 = text2.replace(/^---\s*\n/, `---\nsidebar_position: ${pos1}\n`);
+    } else {
+      text2 = `---\nsidebar_position: ${pos1}\n---\n\n` + text2;
+    }
+    
+    const finalContent1 = btoa(unescape(encodeURIComponent(text1)));
+    const finalContent2 = btoa(unescape(encodeURIComponent(text2)));
+    
+    appendLog(`  - 첫 번째 파일 순서 적용 중…`);
+    const putRes1 = await ghFetch(`/repos/${ORG}/${REPO}/contents/docs/${file1.name}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: `chore(docs): swap order position of ${file1.name} to ${pos2} by @${getCurUser()}`,
+        content: finalContent1,
+        sha: fresh1.sha,
+        branch: BRANCH
+      })
+    });
+    
+    if (!putRes1.ok) {
+      const errData = await putRes1.json().catch(() => ({ message: '응답 분석 실패' }));
+      throw new Error(`[${file1.name}] 커밋 실패: ${errData.message}`);
+    }
+    
+    appendLog(`  - 두 번째 파일 순서 적용 중…`);
+    const putRes2 = await ghFetch(`/repos/${ORG}/${REPO}/contents/docs/${file2.name}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: `chore(docs): swap order position of ${file2.name} to ${pos1} by @${getCurUser()}`,
+        content: finalContent2,
+        sha: fresh2.sha,
+        branch: BRANCH
+      })
+    });
+    
+    if (!putRes2.ok) {
+      const errData = await putRes2.json().catch(() => ({ message: '응답 분석 실패' }));
+      throw new Error(`[${file2.name}] 커밋 실패: ${errData.message}`);
+    }
+    
+    appendLog(`✓ "${file1.name}"와 "${file2.name}"의 순서 교환이 완벽 완료되었습니다!`, 'ok');
+    showStudioToast('문서 순서가 완벽히 스왑되었습니다! ↕️✨', 'success');
+    
+    loadDocs();
+  } catch (err) {
+    appendLog(`✗ 순서 변경 실패: ${err.message}`, 'err');
+    showStudioToast(`순서 변경 실패: ${err.message}`, 'error');
+    loadDocs();
+  }
+}
+
 /* ─── 에디터 초기화 ─── */
 let toastEditor = null;
+let previewReady = false;
+let isSyncingLeft = false;
+let isSyncingRight = false;
+let editorScrollTimeout = null;
+
+// 스크롤 동기화 수동 비활성화 (사용자 피드백 반영: 클릭 및 캐럿 포커스 기반 동기화만 남김)
+function handleEditorScroll(scrollTarget) {
+  // no-op
+}
+
+// 스크롤 위치와 커서 상태를 그대로 지키면서 마크다운 내용을 안전하게 갱신하는 헬퍼 (초정밀 포커스 무장)
+function setMarkdownPreservingScroll(markdown) {
+  if (!toastEditor) return;
+  
+  const scrollContainer = document.querySelector('#toast-editor .toastui-editor-scroll-behavior') || document.querySelector('#toast-editor .cm-scroller');
+  const currentScrollTop = scrollContainer ? scrollContainer.scrollTop : 0;
+  
+  let selection = null;
+  try {
+    selection = toastEditor.getSelection();
+  } catch (e) {
+    console.log("%c[EDITOR] getSelection skipped (editor is currently unfocused)", "color: #9ca3af; font-style: italic;");
+  }
+  
+  toastEditor.setMarkdown(markdown);
+  
+  setTimeout(() => {
+    if (selection && selection[0]) {
+      try {
+        toastEditor.setSelection(selection[0], selection[1]);
+      } catch (e) {
+        // 포커스 복원 실패 시 예외를 조용히 묻어 본문 유실 및 오동작 원천 차단
+      }
+    }
+    if (scrollContainer) {
+      scrollContainer.scrollTop = currentScrollTop;
+    }
+  }, 30);
+}
+
+// 스튜디오 내 실시간 피드백 토스트 알림 메시지 (디버그 & 초프리미엄 UX 가미)
+function showStudioToast(message, type = 'success') {
+  const container = document.getElementById('studio-toast-container') || (() => {
+    const c = document.createElement('div');
+    c.id = 'studio-toast-container';
+    c.style.cssText = `
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 99999;
+      pointer-events: none;
+      font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+    `;
+    document.body.appendChild(c);
+    return c;
+  })();
+
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    padding: 14px 20px;
+    background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+    color: white;
+    font-weight: 600;
+    font-size: 13px;
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    pointer-events: auto;
+  `;
+  toast.innerHTML = `
+    <span style="font-size: 16px;">${type === 'success' ? '✓' : type === 'error' ? '✗' : 'ℹ'}</span>
+    <span>${message}</span>
+  `;
+  container.appendChild(toast);
+
+  // Trigger animation
+  requestAnimationFrame(() => {
+    toast.style.transform = 'translateY(0)';
+    toast.style.opacity = '1';
+  });
+
+  // Remove after 3s
+  setTimeout(() => {
+    toast.style.transform = 'translateY(-20px)';
+    toast.style.opacity = '0';
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
+  }, 3000);
+}
+
 function initEditor() {
   if (toastEditor) return;
+  console.log("%c[EDITOR] Initializing Toast UI Editor...", "color: #3b82f6; font-weight: bold;");
+
   toastEditor = new toastui.Editor({
     el: document.querySelector('#toast-editor'),
     height: '100%',
@@ -635,17 +912,70 @@ function initEditor() {
       }
     }
   });
+
+  // [Scroll Sync & Caret Highlight] 캡처링 이벤트 위임 방식을 통해 타이밍 이슈를 원천 차단
+  const editorEl = document.querySelector('#toast-editor');
+  if (editorEl) {
+    // 캡처링 스크롤 리스너로 내부 스크롤을 무조건 감지 (툴바 등을 제외한 모든 실제 스크롤 타겟 감지)
+    editorEl.addEventListener('scroll', (e) => {
+      if (!e.target.closest('.toastui-editor-toolbar')) {
+        handleEditorScroll(e.target);
+      }
+    }, true); // Capture phase!
+    console.log("%c[EDITOR] Scroll capturing-phase listener registered successfully.", "color: #10b981;");
+
+    // 커서 이동 시 HIGHLIGHT_LINE 전송 위임 바인딩
+    const trackCaret = () => {
+      if (!toastEditor || !previewReady) return;
+      const selection = toastEditor.getSelection();
+      if (selection && selection[0]) {
+        const activeLine = selection[0][0]; // 1-indexed row
+        const frame = document.getElementById('preview-frame');
+        if (frame && frame.contentWindow) {
+          console.log(`%c[EDITOR] Caret moved -> posting HIGHLIGHT_LINE: ${activeLine}`, "color: #a855f7;");
+          frame.contentWindow.postMessage({
+            type: 'HIGHLIGHT_LINE',
+            line: activeLine
+          }, '*');
+        }
+      }
+    };
+    
+    editorEl.addEventListener('keyup', trackCaret);
+    editorEl.addEventListener('mouseup', trackCaret);
+    editorEl.addEventListener('click', trackCaret);
+    toastEditor.on('change', trackCaret);
+    console.log("%c[EDITOR] Caret tracking listeners registered successfully.", "color: #10b981;");
+  }
+
+  // 테마 선택 값 변경 시 즉시 라이브 프리뷰 업데이트 동기화
+  const th = document.getElementById('edit-theme');
+  if (th) {
+    th.addEventListener('change', () => {
+      syncToPreview();
+    });
+  }
 }
 
 /* ─── 라이브 프리뷰 동기화 ─── */
 function syncToPreview() {
   if (!toastEditor) return;
+  if (!previewReady) {
+    console.log("%c[EDITOR] Sync blocked: Preview iframe not ready yet.", "color: #ef4444; font-style: italic;");
+    return;
+  }
+  
   const content = toastEditor.getMarkdown();
+  const theme = document.getElementById('edit-theme')?.value || 'blue';
+  const layout = localStorage.getItem("brochure-layout") || 'standard';
   const frame = document.getElementById('preview-frame');
   if (frame && frame.contentWindow) {
+    console.log("%c[EDITOR] Dispatching MDX_UPDATE to preview. Length: " + content.length, "color: #3b82f6;");
     frame.contentWindow.postMessage({
       type: 'MDX_UPDATE',
-      content: content
+      content: content,
+      theme: theme,
+      layout: layout
     }, '*');
   }
 }
@@ -653,9 +983,9 @@ function syncToPreview() {
 window.refreshPreview = () => {
   const frame = document.getElementById('preview-frame');
   if (frame) {
+    previewReady = false; // 새로고침 시 플래그 락 잠금
+    console.log("%c[EDITOR] Refreshing preview frame. Resetting previewReady to false.", "color: #ef4444; font-weight: bold;");
     frame.src = frame.src; // Reload
-    // Wait a bit for load and then sync
-    setTimeout(syncToPreview, 1000);
   }
 };
 
@@ -666,12 +996,153 @@ window.printPreview = () => {
   }
 };
 
-// Iframe이 준비되었다는 신호를 보내면 즉시 현재 내용 동기화
+// 프리뷰 아이프레임 통신 수신 통합 라우터
 window.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'PREVIEW_READY') {
+  if (!event.data || typeof event.data !== 'object') return;
+
+  // [1] 프리뷰 로딩 완료 시 데이터 초기화 및 싱크 개방
+  if (event.data.type === 'PREVIEW_READY') {
+    previewReady = true;
+    console.log("%c[EDITOR RECEIVER] PREVIEW_READY received! Activating message bridge.", "color: #10b981; font-weight: bold;");
     syncToPreview();
+  } 
+  // [2] 프리뷰 요소 클릭 시 소스 에디터 라인 점프, 포커스 및 해당 줄로 스무스 스크롤 (Click-to-Focus)
+  else if (event.data.type === 'JUMP_TO_LINE') {
+    const line = event.data.line;
+    console.log(`%c[EDITOR RECEIVER] JUMP_TO_LINE received for line: ${line}`, "color: #eab308; font-weight: bold;");
+    if (toastEditor) {
+      toastEditor.focus();
+      toastEditor.setSelection([line, 1], [line, 1]);
+      
+      // 일관성 있게 수정할 라인을 항상 화면 정중앙(Center)에 배치하는 초정밀 뷰포트 정렬 엔진
+      setTimeout(() => {
+        const lineElements = document.querySelectorAll('#toast-editor .cm-line');
+        const scrollContainer = document.querySelector('#toast-editor .toastui-editor-scroll-behavior') || document.querySelector('#toast-editor .cm-scroller');
+        if (scrollContainer && lineElements && lineElements[line - 1]) {
+          const lineEl = lineElements[line - 1];
+          const containerHeight = scrollContainer.clientHeight;
+          const elemTop = lineEl.offsetTop;
+          const elemHeight = lineEl.offsetHeight;
+          
+          // 정중앙 배치 공식: 요소 시작점 - (컨테이너 높이 / 2) + (요소 높이 / 2)
+          const targetScrollTop = elemTop - (containerHeight / 2) + (elemHeight / 2);
+          
+          scrollContainer.scrollTo({
+            top: Math.max(0, targetScrollTop),
+            behavior: 'smooth'
+          });
+        }
+      }, 50);
+    }
+  }
+  // [3] 더블클릭 텍스트 직접 수정 발생 시 안전한 본문 라인 치환 엔진 (Prefix & HTML Wrapper 보존, 스크롤 유지)
+  else if (event.data.type === 'INLINE_TEXT_UPDATE') {
+    const line = event.data.line;
+    const cleanOriginal = event.data.cleanOriginal;
+    const newText = event.data.newText;
+    console.log(`%c[EDITOR RECEIVER] INLINE_TEXT_UPDATE received for line ${line}: "${newText}" (original: "${cleanOriginal}")`, "color: #3b82f6; font-weight: bold;");
+    if (toastEditor) {
+      const markdown = toastEditor.getMarkdown();
+      const lines = markdown.split('\n');
+      const targetIdx = line - 1;
+      
+      console.log(`%c[EDITOR RECEIVER] Total lines: ${lines.length}. Target index: ${targetIdx}`, "color: #3b82f6;");
+      if (targetIdx >= 0 && targetIdx < lines.length) {
+        const originalLine = lines[targetIdx];
+        console.log(`%c[EDITOR RECEIVER] Original line text: "${originalLine}"`, "color: #3b82f6;");
+        
+        let patchedLine = originalLine;
+        let replaced = false;
+        
+        if (cleanOriginal) {
+          const cleanOriginalTrimmed = cleanOriginal.trim();
+          const newTextTrimmed = newText.trim();
+          
+          // 1단계: 가장 이상적인 부분 매칭 치환 시도 (HTML 내부 태그 손상 0% 보장)
+          if (originalLine.includes(cleanOriginal)) {
+            patchedLine = originalLine.replace(cleanOriginal, newText);
+            replaced = true;
+          } else if (originalLine.includes(cleanOriginalTrimmed)) {
+            patchedLine = originalLine.replace(cleanOriginalTrimmed, newTextTrimmed);
+            replaced = true;
+          } else {
+            // 대시 문자(– vs -) 인코딩 호환성 매칭 보정
+            const altOriginal1 = cleanOriginalTrimmed.replace(/-/g, '–');
+            const altOriginal2 = cleanOriginalTrimmed.replace(/–/g, '-');
+            if (originalLine.includes(altOriginal1)) {
+              patchedLine = originalLine.replace(altOriginal1, newTextTrimmed);
+              replaced = true;
+            } else if (originalLine.includes(altOriginal2)) {
+              patchedLine = originalLine.replace(altOriginal2, newTextTrimmed);
+              replaced = true;
+            }
+          }
+        }
+        
+        // 2단계: 부분 치환 매칭 실패 시 전체 구조 분해 조립 가동 (Fallback)
+        if (!replaced) {
+          console.log("%c[EDITOR RECEIVER] Exact replacement missed. Running fallback deconstruction engine.", "color: #eab308;");
+          const leadingMatch = originalLine.match(/^(\s*(?:#+|\*|-|\d+\.)?\s*(?:<[a-zA-Z0-9_-]+[^>]*>)*\s*)/);
+          const leading = leadingMatch ? leadingMatch[1] : '';
+          
+          const trailingMatch = originalLine.match(/((?:\s*<\/[a-zA-Z0-9_-]+>)*\s*)$/);
+          const trailing = trailingMatch ? trailingMatch[1] : '';
+          
+          const originalCore = originalLine.substring(leading.length, originalLine.length - trailing.length);
+          
+          let restoredText = newText;
+          if (originalCore.includes('<br />')) {
+            restoredText = restoredText.replace(/\n/g, '<br />');
+          } else if (originalCore.includes('<br>')) {
+            restoredText = restoredText.replace(/\n/g, '<br>');
+          }
+          
+          patchedLine = leading + restoredText + trailing;
+        }
+        
+        console.log(`%c[EDITOR RECEIVER] Patched line to: "${patchedLine}"`, "color: #10b981; font-weight: bold;");
+        lines[targetIdx] = patchedLine;
+        
+        // 스크롤과 포커스 손실 없이 본문 치환 반영 (튕김 및 반응 없음 문제 근본 해소)
+        setMarkdownPreservingScroll(lines.join('\n'));
+        
+        // 사용자 피드백을 실시간으로 시각화하는 아름다운 프리미엄 토스트 노티
+        showStudioToast(`라인 ${line} 수정 내용이 에디터에 완벽 반영되었습니다! ✨`, 'success');
+        
+        // 치환 완료 후 수 밀리초 대기하여 렌더 완료 시 해당 줄 다시 글로우 하이라이트 동기화
+        setTimeout(() => {
+          const frame = document.getElementById('preview-frame');
+          if (frame && frame.contentWindow) {
+            frame.contentWindow.postMessage({
+              type: 'HIGHLIGHT_LINE',
+              line: line
+            }, '*');
+          }
+        }, 150);
+      } else {
+        console.warn(`%c[EDITOR RECEIVER] targetIdx ${targetIdx} is out of bounds!`, "color: #dc2626;");
+        showStudioToast(`오류: 라인 ${line}이 문서 줄 수(${lines.length})를 초과했습니다.`, 'error');
+      }
+    }
   }
 });
+
+// 에디터 마크다운 로딩 시 초기 스크롤 위치 및 커서 좌표를 항상 문서 맨 위(1라인)로 강제 정렬
+function resetScrollAndCursorToTop() {
+  if (toastEditor) {
+    toastEditor.setSelection([1, 1], [1, 1]);
+    toastEditor.focus();
+  }
+  const scrollContainer = document.querySelector('#toast-editor .toastui-editor-scroll-behavior') || document.querySelector('#toast-editor .cm-scroller');
+  if (scrollContainer) {
+    scrollContainer.scrollTop = 0;
+  }
+  const frame = document.getElementById('preview-frame');
+  if (frame && frame.contentWindow) {
+    frame.contentWindow.scrollTo({ top: 0, behavior: 'auto' });
+  }
+  console.log("%c[EDITOR] Reset scroll and cursor selection to Top [Line 1].", "color: #3b82f6; font-weight: bold;");
+}
 
 /* ─── 새 문서 작성(모달) ─── */
 window.openCreateModal = () => {
@@ -690,8 +1161,11 @@ window.openCreateModal = () => {
   toastEditor.setMarkdown('');
   document.getElementById('modal-edit').style.display = 'flex';
   
-  // 약간의 지연 후 초기 동기화 (Iframe 로드 대기)
-  setTimeout(syncToPreview, 500);
+  // 약간의 지연 후 초기 동기화 및 스크롤 최상단 정렬
+  setTimeout(() => {
+    syncToPreview();
+    resetScrollAndCursorToTop();
+  }, 500);
 };
 
 /* ─── 메타데이터 및 본문 수정(모달) ─── */
@@ -737,7 +1211,7 @@ async function openEditModal(name, sha) {
 /* 실제 모달을 열고 데이터를 채우는 핵심 로직 분리 */
 async function doOpenEditModal(name, sha) {
   try {
-    const r = await ghFetch(`/repos/${ORG}/${REPO}/contents/docs/${name}`);
+    const r = await ghFetch(`/repos/${ORG}/${REPO}/contents/docs/${name}?t=${Date.now()}`);
     if (!r.ok) throw new Error('파일을 불러올 수 없습니다.');
     const d = await r.json();
     const text = decodeURIComponent(escape(atob(d.content)));
@@ -752,7 +1226,7 @@ async function doOpenEditModal(name, sha) {
       id = getVal('id'); title = getVal('title'); pos = getVal('sidebar_position'); theme = getVal('theme') || 'blue';
     }
 
-    editTarget = { name, sha: sha || d.sha, text: stripped };
+    editTarget = { name, sha: d.sha, text: stripped };
     document.getElementById('modal-filename').textContent = name + ' 수정';
     document.getElementById('edit-title').value = title;
     document.getElementById('edit-pos').value = pos;
@@ -765,8 +1239,11 @@ async function doOpenEditModal(name, sha) {
     toastEditor.setMarkdown(editTarget.text);
     document.getElementById('modal-edit').style.display = 'flex';
     
-    // 초기 동기화
-    setTimeout(syncToPreview, 500);
+    // 초기 동기화 및 스크롤 최상단 정렬
+    setTimeout(() => {
+      syncToPreview();
+      resetScrollAndCursorToTop();
+    }, 500);
   } catch(e) {
     alert(e.message);
   }
