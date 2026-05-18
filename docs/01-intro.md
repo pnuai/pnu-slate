@@ -1,7 +1,7 @@
 ---
 id: intro
 title: 대학 소개 및 운영 방향
-sidebar_position: 2
+sidebar_position: 1
 theme: blue
 ---
 <style>{`
