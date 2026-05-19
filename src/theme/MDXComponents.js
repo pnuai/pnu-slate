@@ -17,6 +17,13 @@ import {
   ChaptersSection,
   RoadmapSection,
   BadgesSection,
+  ChapterHeaderSection,
+  KpiSection,
+  StrategySection,
+  AlphaGridSection,
+  PanelSection,
+  StepperSection,
+  SplitSection,
 } from '@site/src/components/BrochureBlocks';
 
 // 모든 .md / .mdx 파일에서 import 없이 바로 사용 가능
@@ -32,7 +39,7 @@ export default {
   StepItem,
   Details,
   Text,
-  
+
   // Brochure Directives & Components
   hero: HeroSection,
   stats: StatsSection,
@@ -43,6 +50,14 @@ export default {
   chapters: ChaptersSection,
   roadmap: RoadmapSection,
   badges: BadgesSection,
+  chapterheader: ChapterHeaderSection,
+  ChapterHeader: ChapterHeaderSection,
+  kpi: KpiSection,
+  strategy: StrategySection,
+  alphagrid: AlphaGridSection,
+  panel: PanelSection,
+  stepper: StepperSection,
+  split: SplitSection,
   HeroSection,
   StatsSection,
   CardsSection,
@@ -52,4 +67,11 @@ export default {
   ChaptersSection,
   RoadmapSection,
   BadgesSection,
+  ChapterHeaderSection,
+  KpiSection,
+  StrategySection,
+  AlphaGridSection,
+  PanelSection,
+  StepperSection,
+  SplitSection,
 };

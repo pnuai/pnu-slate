@@ -1,12 +1,191 @@
 import React from 'react';
-import { Redirect } from '@docusaurus/router';
-import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+import Layout from '@theme/Layout';
+import Link from '@docusaurus/Link';
 import useBaseUrl from '@docusaurus/useBaseUrl';
+import { ThemeProvider } from '@site/src/components/BrochureBlocks/ThemeContext';
+
+const CHAPTERS = [
+  { num: '01', label: '사업소개',    path: '/docs/intro',   desc: '대학 소개 및 SW중심대학 선정 배경, 핵심 현황' },
+  { num: '02', label: '교육목표',    path: '/docs/part-2',  desc: '단계별 추진 로드맵 및 분야별 주요 성과' },
+  { num: '03', label: '교육혁신',    path: '/docs/part-3',  desc: '8개 특화 트랙 및 융합교육 혁신 방향' },
+  { num: '04', label: '환경개선',    path: '/docs/part-4',  desc: 'PNU-ICEx 통합 교육 인프라 및 성과관리 체계' },
+  { num: '05', label: '전공교육',    path: '/docs/part-5',  desc: '전공 심화 교육과정 및 산학협력 운영' },
+  { num: '06', label: '융합교육',    path: '/docs/part-6',  desc: 'AI·SW 융합트랙 및 마이크로디그리 운영' },
+  { num: '07', label: '성과확산',    path: '/docs/part-7',  desc: '지역사회 AI·SW 가치확산 및 공교육 연계' },
+  { num: '08', label: '일반현황',    path: '/docs/part-8',  desc: '대학 일반현황 및 주요 지표 통계' },
+];
+
+const COLORS = [
+  '#1565c0', '#1976d2', '#1e88e5', '#2196f3',
+  '#1976d2', '#1565c0', '#1e88e5', '#2196f3',
+];
 
 export default function Home() {
-  const { siteConfig } = useDocusaurusContext();
-  const firstDocLink = siteConfig.customFields?.firstDocLink || '/docs/intro';
-  const redirectUrl = useBaseUrl(firstDocLink);
-  
-  return <Redirect to={redirectUrl} />;
+  const adminUrl = useBaseUrl('/admin/');
+
+  return (
+    <ThemeProvider initialTheme="public-blue">
+      <Layout title="PNU AI·SW 중심대학 브로슈어" description="부산대학교 AI융합교육원 브로슈어 포털">
+        <main style={{ background: '#f0f4f8', minHeight: '100vh' }}>
+
+          {/* 히어로 */}
+          <div style={{
+            background: 'linear-gradient(135deg, #1565c0 0%, #1976d2 40%, #1e88e5 70%, #1565c0 100%)',
+            padding: '80px 10% 72px',
+            position: 'relative',
+            overflow: 'hidden',
+          }}>
+            {/* 데코 원 */}
+            <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', width: '600px', height: '600px', top: '-200px', right: '-60px', borderRadius: '50%', background: '#90caf9', opacity: 0.18, filter: 'blur(90px)' }} />
+              <div style={{ position: 'absolute', width: '400px', height: '400px', bottom: '-120px', left: '-40px', borderRadius: '50%', background: '#64b5f6', opacity: 0.15, filter: 'blur(80px)' }} />
+            </div>
+
+            <div style={{ position: 'relative', zIndex: 2, maxWidth: '900px' }}>
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: '8px',
+                fontSize: '12px', fontWeight: '700', letterSpacing: '0.12em', textTransform: 'uppercase',
+                color: 'rgba(255,255,255,0.7)', padding: '5px 14px',
+                border: '1px solid rgba(255,255,255,0.2)', borderRadius: '20px',
+                background: 'rgba(255,255,255,0.08)', marginBottom: '24px',
+              }}>
+                부산대학교 AI융합교육원
+              </div>
+              <h1 style={{
+                fontSize: 'clamp(2.4rem, 5vw, 4.5rem)', fontWeight: '900', lineHeight: '1.15',
+                letterSpacing: '-0.04em', color: '#ffffff', margin: '0 0 20px', wordBreak: 'keep-all',
+              }}>
+                AI·SW 중심대학<br />브로슈어 포털
+              </h1>
+              <p style={{
+                fontSize: 'clamp(1rem, 1.6vw, 1.35rem)', lineHeight: '1.7',
+                color: 'rgba(255,255,255,0.8)', margin: '0 0 36px', wordBreak: 'keep-all',
+                maxWidth: '640px',
+              }}>
+                부산대학교 SW중심대학 사업의 비전과 성과를 한눈에 확인하세요.<br />
+                챕터별로 정리된 8개 분야를 탐색할 수 있습니다.
+              </p>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <Link to="/docs/intro" style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '8px',
+                  background: '#ffffff', color: '#1565c0',
+                  fontWeight: '800', fontSize: '15px', padding: '13px 28px',
+                  borderRadius: '9999px', textDecoration: 'none',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.18)',
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                }}>
+                  브로슈어 보기 →
+                </Link>
+                <a href={adminUrl} target="_blank" rel="noopener noreferrer" style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '8px',
+                  background: 'rgba(255,255,255,0.12)', color: '#ffffff',
+                  fontWeight: '700', fontSize: '14px', padding: '13px 24px',
+                  borderRadius: '9999px', textDecoration: 'none',
+                  border: '1px solid rgba(255,255,255,0.28)',
+                }}>
+                  관리 페이지
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* 챕터 그리드 */}
+          <div style={{ padding: '56px 10%' }}>
+            <div style={{ marginBottom: '36px' }}>
+              <div style={{ fontSize: '12px', fontWeight: '800', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5b8ad4', marginBottom: '6px' }}>
+                Contents
+              </div>
+              <div style={{ fontSize: '28px', fontWeight: '900', color: '#1565c0', letterSpacing: '-0.02em' }}>
+                8개 챕터 구성
+              </div>
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: '20px',
+            }}>
+              {CHAPTERS.map((ch, i) => (
+                <Link key={ch.num} to={ch.path} style={{ textDecoration: 'none' }}>
+                  <div style={{
+                    background: '#ffffff',
+                    border: '1px solid #dce8f8',
+                    borderTop: `4px solid ${COLORS[i]}`,
+                    borderRadius: '14px',
+                    padding: '28px 24px',
+                    boxShadow: '0 2px 12px rgba(21,101,192,0.07)',
+                    transition: 'transform 0.2s, box-shadow 0.2s',
+                    height: '100%',
+                    boxSizing: 'border-box',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(21,101,192,0.16)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 2px 12px rgba(21,101,192,0.07)'; }}
+                  >
+                    <div style={{
+                      fontSize: '11px', fontWeight: '900', letterSpacing: '0.12em',
+                      color: COLORS[i], marginBottom: '10px', textTransform: 'uppercase',
+                    }}>
+                      CHAPTER {ch.num}
+                    </div>
+                    <div style={{
+                      fontSize: '20px', fontWeight: '800', color: '#1a3a6e',
+                      marginBottom: '10px', letterSpacing: '-0.01em',
+                    }}>
+                      {ch.label}
+                    </div>
+                    <div style={{
+                      fontSize: '13px', color: '#5b7fa8', lineHeight: '1.6',
+                    }}>
+                      {ch.desc}
+                    </div>
+                    <div style={{
+                      marginTop: '20px', fontSize: '13px', fontWeight: '700',
+                      color: COLORS[i], display: 'flex', alignItems: 'center', gap: '4px',
+                    }}>
+                      자세히 보기 →
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* 하단 통계 배너 */}
+          <div style={{
+            margin: '0 10% 56px',
+            background: 'linear-gradient(135deg, #1565c0 0%, #1976d2 60%, #1e88e5 100%)',
+            borderRadius: '20px',
+            padding: '48px 56px',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '0',
+            color: '#fff',
+            position: 'relative',
+            overflow: 'hidden',
+          }}>
+            <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+              <div style={{ position: 'absolute', width: '400px', height: '400px', top: '-100px', right: '-60px', borderRadius: '50%', background: '#90caf9', opacity: 0.12, filter: 'blur(70px)' }} />
+            </div>
+            {[
+              { value: '192명', label: 'SW학과 정원', sub: '2019년 대비 43% 증원' },
+              { value: '8개', label: '전공 특화 트랙', sub: '클라우드·보안·IoT 등' },
+              { value: '14개', label: 'SW-X 융합트랙', sub: '전 학문 분야 융합 운영' },
+              { value: '21,302㎡', label: '전용 교육 시설', sub: 'IT관·경암공학관 신축' },
+            ].map((stat, i) => (
+              <div key={i} style={{
+                textAlign: 'center', padding: '0 20px',
+                borderRight: i < 3 ? '1px solid rgba(255,255,255,0.15)' : 'none',
+                position: 'relative', zIndex: 2,
+              }}>
+                <div style={{ fontSize: '36px', fontWeight: '900', color: '#fff', letterSpacing: '-0.02em', lineHeight: '1.1', marginBottom: '6px' }}>{stat.value}</div>
+                <div style={{ fontSize: '13px', fontWeight: '700', color: 'rgba(255,255,255,0.85)', marginBottom: '4px' }}>{stat.label}</div>
+                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>{stat.sub}</div>
+              </div>
+            ))}
+          </div>
+
+        </main>
+      </Layout>
+    </ThemeProvider>
+  );
 }

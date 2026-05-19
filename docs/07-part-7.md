@@ -1,7 +1,8 @@
----
+﻿---
 id: part-7
 title: "성과확산 및 인재기반 조성"
 sidebar_position: 7
+nav_label: 성과확산
 ---
 
 <style>{`

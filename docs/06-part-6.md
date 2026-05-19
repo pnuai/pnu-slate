@@ -1,7 +1,8 @@
----
+﻿---
 id: part-6
 title: "AI·SW융합교육 및 비전공자 전문교육 확대"
 sidebar_position: 6
+nav_label: 융합교육
 ---
 
 <style>{`

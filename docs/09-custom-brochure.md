@@ -1,7 +1,8 @@
----
+﻿---
 id: custom-brochure
 title: "AI융합교육원 브로슈어"
 sidebar_position: 9
+nav_label: 브로슈어
 theme: public-blue
 ---
 

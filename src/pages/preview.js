@@ -466,7 +466,8 @@ export default function PreviewPage() {
                           tagNames: [
                             'div', 'span', 'style', 'section', 'article', 
                             'highlight', 'text', 'columns', 'col', 'column', 'callout', 'herobutton',
-                            'hero', 'stats', 'cards', 'timeline', 'quote', 'cta'
+                            'hero', 'stats', 'cards', 'timeline', 'quote', 'cta',
+                            'chapters', 'roadmap', 'badges'
                           ] 
                         }],
                         rehypeInjectLines

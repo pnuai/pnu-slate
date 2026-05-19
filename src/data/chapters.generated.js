@@ -2,34 +2,34 @@
 const chapters =
 [
   {
-    "id": "part-2",
-    "title": "교육목표 및 혁신노력",
-    "description": "",
-    "theme": "blue",
-    "link": "/docs/part-2",
-    "sidebar_position": 1
-  },
-  {
     "id": "intro",
-    "title": "대학 소개 및 운영 방향",
+    "title": "사업소개",
     "description": "",
-    "theme": "blue",
+    "theme": "public-blue",
     "link": "/docs/intro",
     "sidebar_position": 1
   },
   {
-    "id": "part-3",
-    "title": "대학의 자율적인 교육혁신",
+    "id": "part-2",
+    "title": "교육목표",
     "description": "",
-    "theme": "gray",
+    "theme": "public-blue",
+    "link": "/docs/part-2",
+    "sidebar_position": 2
+  },
+  {
+    "id": "part-3",
+    "title": "교육혁신",
+    "description": "",
+    "theme": "public-blue",
     "link": "/docs/part-3",
     "sidebar_position": 3
   },
   {
     "id": "part-4",
-    "title": "교육환경 개선 및 성과 모니터링",
+    "title": "환경개선",
     "description": "",
-    "theme": "blue",
+    "theme": "public-blue",
     "link": "/docs/part-4",
     "sidebar_position": 4
   },
@@ -75,9 +75,9 @@ const chapters =
   },
   {
     "id": "template",
-    "title": "템플릿 및 컴포넌트 가이드",
+    "title": "템플릿",
     "description": "",
-    "theme": "blue",
+    "theme": "public-blue",
     "link": "/docs/template",
     "sidebar_position": 99
   }

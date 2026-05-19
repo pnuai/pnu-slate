@@ -1,6 +1,12 @@
 import React, { useEffect } from 'react';
-import Layout from '@theme-original/DocItem/Layout';
 import { useDoc } from '@docusaurus/plugin-content-docs/client';
+import DocItemPaginator from '@theme/DocItem/Paginator';
+import DocVersionBanner from '@theme/DocVersionBanner';
+import DocVersionBadge from '@theme/DocVersionBadge';
+import DocItemFooter from '@theme/DocItem/Footer';
+import DocItemContent from '@theme/DocItem/Content';
+import DocBreadcrumbs from '@theme/DocBreadcrumbs';
+import ContentVisibility from '@theme/ContentVisibility';
 import { useTheme } from '@site/src/components/BrochureBlocks/ThemeContext';
 
 function DocThemeSync() {
@@ -14,11 +20,24 @@ function DocThemeSync() {
   return null;
 }
 
-export default function DocItemLayout(props) {
+export default function DocItemLayout({ children }) {
+  const { metadata } = useDoc();
   return (
     <>
       <DocThemeSync />
-      <Layout {...props} />
+      <div style={{ width: '100%', maxWidth: '100%' }}>
+        <ContentVisibility metadata={metadata} />
+        <DocVersionBanner />
+        <div style={{ width: '100%', maxWidth: '100%' }}>
+          <article>
+            <DocBreadcrumbs />
+            <DocVersionBadge />
+            <DocItemContent>{children}</DocItemContent>
+            <DocItemFooter />
+          </article>
+          <DocItemPaginator />
+        </div>
+      </div>
     </>
   );
 }

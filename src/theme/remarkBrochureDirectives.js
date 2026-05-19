@@ -9,7 +9,7 @@ function remarkBrochureDirectives() {
         node.type === 'leafDirective' ||
         node.type === 'textDirective'
       ) {
-        const targetBlocks = ['hero', 'stats', 'cards', 'timeline', 'quote', 'cta', 'chapters', 'roadmap', 'badges'];
+        const targetBlocks = ['hero', 'stats', 'cards', 'timeline', 'quote', 'cta', 'chapters', 'roadmap', 'badges', 'chapter-header', 'chapterheader', 'kpi', 'strategy', 'alphagrid', 'panel', 'stepper', 'split'];
         if (!targetBlocks.includes(node.name)) return;
 
         const data = node.data || (node.data = {});
@@ -19,9 +19,10 @@ function remarkBrochureDirectives() {
         const toMarkdownText = (n) => {
           if (!n) return '';
           if (n.type === 'text') return n.value;
+          if (n.type === 'break') return '\n';  // softbreak → 실제 개행으로 복원
           if (n.type === 'code') return `\n\`\`\`\n${n.value}\n\`\`\`\n`;
           if (n.type === 'inlineCode') return `\`${n.value}\``;
-          
+
           if (n.type === 'paragraph') {
             return n.children ? n.children.map(toMarkdownText).join('') + '\n' : '';
           }
@@ -51,59 +52,90 @@ function remarkBrochureDirectives() {
         let parsedProps = {};
         let rawItemsList = null;
 
+        // key: value 줄을 직접 파싱 — YAML 파서 없이 안전하게 처리
+        const parseMetaLines = (lines) => {
+          const props = {};
+          for (const line of lines) {
+            const m = line.match(/^([a-zA-Z0-9_-]+):\s*(.*)/);
+            if (m) props[m[1]] = m[2].trim();
+          }
+          return props;
+        };
+
+        const toBase64 = (arr) => {
+          const jsonStr = JSON.stringify(arr);
+          return typeof Buffer !== 'undefined'
+            ? Buffer.from(jsonStr, 'utf8').toString('base64')
+            : btoa(unescape(encodeURIComponent(jsonStr)));
+        };
+
         if (rawBody) {
-          try {
-            const lines = rawBody.split('\n');
+          const lines = rawBody.split('\n');
+
+          if (node.name === 'split') {
+            // split: left: / right: 섹션 분리
+            const metaLines = [];
+            let leftLines = [], rightLines = [];
+            let currentSection = null;
+
+            for (const line of lines) {
+              const trimmed = line.trim();
+              if (trimmed === 'left:')  { currentSection = 'left';  continue; }
+              if (trimmed === 'right:') { currentSection = 'right'; continue; }
+              if (currentSection === 'left')       leftLines.push(line);
+              else if (currentSection === 'right') rightLines.push(line);
+              else                                 metaLines.push(line);
+            }
+
+            parsedProps = parseMetaLines(metaLines);
+
+            if (leftLines.length) {
+              try {
+                const leftObj = yaml.load(leftLines.join('\n').trim());
+                if (Array.isArray(leftObj)) parsedProps['left-items'] = toBase64(leftObj);
+              } catch (_) {}
+            }
+            if (rightLines.length) {
+              try {
+                const rightObj = yaml.load(rightLines.join('\n').trim());
+                if (Array.isArray(rightObj)) parsedProps['right-items'] = toBase64(rightObj);
+              } catch (_) {}
+            }
+          } else {
+            // 일반 디렉티브: 메타 줄 + 리스트 줄 분리
             const metaLines = [];
             const listLines = [];
             let isListStarted = false;
 
-            for (let line of lines) {
-              const trimmed = line.trim();
-              if (trimmed.startsWith('-')) {
-                isListStarted = true;
-              }
-              if (isListStarted) {
-                listLines.push(line);
-              } else {
-                metaLines.push(line);
-              }
+            for (const line of lines) {
+              if (line.trim().startsWith('-')) isListStarted = true;
+              if (isListStarted) listLines.push(line);
+              else metaLines.push(line);
             }
 
-            const metaStr = metaLines.join('\n').trim();
-            const listStr = listLines.join('\n').trim();
+            parsedProps = parseMetaLines(metaLines);
 
-            if (metaStr) {
-              const metaObj = yaml.load(metaStr);
-              if (metaObj && typeof metaObj === 'object') {
-                parsedProps = { ...metaObj };
-              }
-            }
-
-            if (listStr) {
-              const listObj = yaml.load(listStr);
-              if (Array.isArray(listObj)) {
-                rawItemsList = listObj;
-              } else if (listObj && typeof listObj === 'object') {
-                if (listObj.items) {
-                  rawItemsList = listObj.items;
-                } else {
-                  parsedProps = { ...parsedProps, ...listObj };
+            if (listLines.length) {
+              try {
+                const listObj = yaml.load(listLines.join('\n').trim());
+                if (Array.isArray(listObj)) rawItemsList = listObj;
+                else if (listObj && typeof listObj === 'object') {
+                  if (listObj.items) rawItemsList = listObj.items;
+                  else parsedProps = { ...parsedProps, ...listObj };
                 }
-              }
+              } catch (_) {}
             }
-          } catch (e) {
-            console.warn('[Brochure Directive Parser Warning]: Failed to parse body of :::' + node.name, e);
           }
         }
 
         // [Base64 안전 격리 전송 설계]
-        // 복잡한 Array 객체가 HTML/SSG/JSX 직렬화 과정에서 [object Object] 문자열로 뭉개지는 것을 원천 차단하기 위해,
-        // items 배열을 Base64 인코딩된 깨끗하고 손실 없는 일반 아스키 문자열로 치환하여 전달
+        // items 배열을 Base64 인코딩된 문자열로 치환하여 JSX 직렬화 문제 방지
         if (rawItemsList) {
           try {
             const jsonStr = JSON.stringify(rawItemsList);
-            const base64Str = Buffer.from(jsonStr, 'utf8').toString('base64');
+            const base64Str = typeof Buffer !== 'undefined'
+              ? Buffer.from(jsonStr, 'utf8').toString('base64')
+              : btoa(unescape(encodeURIComponent(jsonStr)));
             parsedProps.items = base64Str;
           } catch (err) {
             console.error('[Brochure Directive Parser Base64 Error]:', err);
@@ -116,7 +148,12 @@ function remarkBrochureDirectives() {
           ...parsedProps
         };
 
-        data.hName = node.name;
+        const nameMap = {
+          chapterheader: 'ChapterHeader', 'chapter-header': 'ChapterHeader',
+          kpi: 'kpi', strategy: 'strategy', alphagrid: 'alphagrid',
+          panel: 'panel', stepper: 'stepper', split: 'split',
+        };
+        data.hName = nameMap[node.name] || node.name;
         data.hProperties = {
           ...node.attributes
         };

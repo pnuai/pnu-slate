@@ -1,181 +1,478 @@
----
+﻿---
 id: template
 title: 템플릿 및 컴포넌트 가이드
 sidebar_position: 99
-theme: blue
+nav_label: 템플릿
+theme: public-blue
 ---
-<style>{`
-  :root {
-    --navy: #0b1f45;
-    --blue: #1651c8;
-    --sky: #3a9fe0;
-    --coral: #e84b35;
-    --mint: #27c0a4;
-    --gold: #f5a623;
-    --light: #eef4ff;
-    --gray: #667799;
-    --border: #d8e4f4;
-    --white: #fff;
-    --bg: #f5f8ff;
-  }
 
-  /* 템플릿 전용 커스텀 스타일이 필요하다면 이곳에 추가하세요 */
-`}</style>
-
-<div className="hero fade-up">
-  <div className="hero-grid" style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
-    <div className="hero-content">
-      <span className="hero-badge">컴포넌트 가이드</span>
-      <h1 className="hero-title">
-        매력적인 브로슈어 <br/>
-        <span className="highlight-text">손쉽게 만들기</span>
-      </h1>
-      <p className="hero-desc">
-        이 페이지는 브로슈어 작성에 사용할 수 있는 다양한 UI 컴포넌트의 모음입니다.<br/>
-        원하는 디자인을 복사하여 새 문서에 붙여넣어 사용하세요.
-      </p>
-    </div>
-  </div>
-</div>
-
-## 1. 하이라이트 & 강조 텍스트
-
-기본적인 마크다운 문법 외에도 글자를 예쁘게 강조할 수 있습니다.
-
-- <Highlight color="#1651c8">파란색 하이라이트</Highlight>
-- <Highlight color="#e84b35">빨간색 하이라이트</Highlight>
-- <Highlight color="#27c0a4">민트색 하이라이트</Highlight>
-
-> **[참고]** 마크다운 인용구(`>`)를 사용하면 이렇게 깔끔한 박스 형태로 표시됩니다.
+:::hero
+badge: 📋 TEMPLATE GUIDE
+title: 브로슈어 작성 가이드
+description: 이 페이지에서 모든 블록의 사용법을 확인하고 복사해서 사용하세요. JSX 코드 없이 ::: 문법만으로 모든 레이아웃을 만들 수 있습니다.
+:::
 
 ---
 
-## 2. 2단 / 3단 브로슈어 전용 레이아웃 (Stabilized Columns)
+## 핵심 규칙
 
-인쇄 시 절대 깨지지 않는 브로슈어 전용 레이아웃 시스템입니다. 2단 또는 3단 구성을 선택할 수 있습니다.
-
-### [3단 레이아웃 예제]
-<div className="brochure-columns-3">
-  <div className="brochure-col">
-    <h3>✨ 첫 번째 컬럼</h3>
-    <p>여기에 첫 번째 내용을 적습니다. 사진이나 표를 넣어도 좋습니다.</p>
-  </div>
-  <div className="brochure-col">
-    <h3>🚀 두 번째 컬럼</h3>
-    <p>가운데에 들어가는 내용입니다. 인쇄 시에도 완벽한 가로 배열을 유지합니다.</p>
-  </div>
-  <div className="brochure-col">
-    <h3>🎯 세 번째 컬럼</h3>
-    <p>오른쪽에 들어가는 내용입니다. 3단 레이아웃도 문제 없습니다.</p>
-  </div>
-</div>
-
-### [2단 레이아웃 예제]
-<div className="brochure-columns-2">
-  <div className="brochure-col">
-    <h3>📂 A 섹션</h3>
-    <p>왼쪽에 배치될 내용입니다.</p>
-  </div>
-  <div className="brochure-col">
-    <h3>📊 B 섹션</h3>
-    <p>오른쪽에 배치될 내용입니다.</p>
-  </div>
-</div>
+- 모든 블록은 `:::블록이름` 으로 시작하고 `:::` 으로 끝납니다
+- 속성은 `key: 값` 형태로 적습니다
+- 목록 항목은 `-` 로 시작합니다
+- 항목 내 여러 값은 `|` 파이프로 구분합니다
+- 큰따옴표(`"`), 꺾쇠(`<>`)는 속성값에 넣지 마세요
+- 숫자 특수기호(①②③)는 반드시 따옴표로 감쌉니다: `"①"`
 
 ---
 
-## 3. 단계별 추진 로드맵 (Phase Blocks)
+## ① hero — 상단 히어로 배너
 
-시간 순서대로 진행되는 단계나 중요한 구역을 나눌 때 사용하기 좋은 블록 디자인입니다.
+페이지 가장 위에 반드시 배치합니다.
 
-<div className="phase-block fade-up">
-  <div className="phase-block-header">
-    <h3>1단계: 기반 구축 및 혁신 (STEP 1)</h3>
-    <span className="period-tag">2023–2024</span>
-  </div>
-  <div className="phase-block-body">
-    <div className="area-group">
-      <div className="area-label">교육 부문</div>
-      <ul className="item-list">
-        <li>전공트랙 신설 및 교육과정 개편</li>
-        <li>최신 기술(AI, 메타버스 등) 인프라 도입</li>
-      </ul>
-    </div>
-    <div className="area-group">
-      <div className="area-label">산학 부문</div>
-      <ul className="item-list">
-        <li>지역 기업 연계 프로젝트 발굴</li>
-        <li>문제해결형 플랫폼 구축 완료</li>
-      </ul>
-    </div>
-  </div>
-</div>
+```
+:::hero
+badge: CHAPTER 01 · 사업소개
+title: 진정한 AI·SW 가치확산을 실현하는 부산대학교 SW중심대학
+description: 대학교육을 SW중심으로 혁신함으로써 학생·기업·사회의 Software 경쟁력을 강화합니다.
+:::
+```
 
-<div className="phase-block pb2 fade-up" style={{ marginTop: '30px' }}>
-  <div className="phase-block-header">
-    <h3>2단계: 성과 고도화 (STEP 2)</h3>
-    <span className="period-tag">2025–2026</span>
-  </div>
-  <div className="phase-block-body">
-    <div className="area-group">
-      <div className="area-label">확산 부문</div>
-      <ul className="item-list">
-        <li>부울경 지역으로 우수사례 확산</li>
-        <li>맞춤형 인재 배출 및 취업 연계 90% 달성</li>
-      </ul>
-    </div>
-  </div>
-</div>
+:::hero
+badge: CHAPTER 01 · 사업소개
+title: 진정한 AI·SW 가치확산을 실현하는 부산대학교 SW중심대학
+description: 대학교육을 SW중심으로 혁신함으로써 학생·기업·사회의 Software 경쟁력을 강화합니다.
+:::
 
 ---
 
-## 4. 눈에 띄는 통계 수치 (Data Highlights)
+## ② kpi — 핵심 지표 가로 나열
 
-숫자를 강조해서 보여줘야 할 때 매우 유용한 레이아웃입니다. (브로슈어 컬럼 시스템 적용)
+숫자·통계를 가로로 나란히 보여줍니다.
 
-<div className="brochure-columns-2">
-  <div className="brochure-col">
-    <div style={{ background: '#f5f8ff', padding: '24px', borderRadius: '12px', textAlign: 'center', border: '1px solid #d8e4f4' }}>
-      <div style={{ fontSize: '36px', fontWeight: '900', color: '#1651c8', marginBottom: '8px' }}>+43.3%</div>
-      <div style={{ fontSize: '15px', color: '#667799', fontWeight: '600' }}>SW전공정원 대폭 증원</div>
-    </div>
-  </div>
-  <div className="brochure-col">
-    <div style={{ background: '#f5f8ff', padding: '24px', borderRadius: '12px', textAlign: 'center', border: '1px solid #d8e4f4' }}>
-      <div style={{ fontSize: '36px', fontWeight: '900', color: '#27c0a4', marginBottom: '8px' }}>21,302㎡</div>
-      <div style={{ fontSize: '15px', color: '#667799', fontWeight: '600' }}>최첨단 교육시설 확충</div>
-    </div>
-  </div>
-</div>
+```
+:::kpi
+subtitle: Key Figures
+title: 핵심 현황
 
-<br/><br/>
+- label: SW학과 정원
+  value: 192명
+  sub: 2019년 대비 43% 순증
+
+- label: 전공 특화 트랙
+  value: 8개
+  sub: 클라우드·보안·IoT 등
+
+- label: 동남권 AI·SW
+  value: 거점 1위
+  sub: 국립대학 최초 SW중심대학 선정
+:::
+```
+
+:::kpi
+subtitle: Key Figures
+title: 핵심 현황
+
+- label: SW학과 정원
+  value: 192명
+  sub: 2019년 대비 43% 순증
+
+- label: 전공 특화 트랙
+  value: 8개
+  sub: 클라우드·보안·IoT 등
+
+- label: 동남권 AI·SW
+  value: 거점 1위
+  sub: 국립대학 최초 SW중심대학 선정
+:::
 
 ---
-## 5. 핵심 안내 및 알림 (Callout)
 
-중요한 공지나 주의사항을 강조할 때 사용합니다. `type`에 따라 색상과 아이콘이 바뀝니다.
+## ③ cards — 카드 그리드
+
+아이콘+제목+설명 카드를 그리드로 배치합니다.
+
+```
+:::cards
+title: 5대 핵심 교육 미션
+subtitle: CORE EDUCATION MISSION
+columns: 3
+variant: elevated
+
+- title: AI·SW 전문인력 양성
+  description: 이론과 실무를 겸비한 AI·SW 전문 교육으로 실무형 인재 양성
+  icon: 🎯
+
+- title: 실효성 있는 산학협력
+  description: 산학협력 프로젝트, 채용연계형 인턴십을 통한 실무 역량 교육
+  icon: 🤝
+
+- title: AI·SW 가치확산
+  description: 공교육 내 AI·SW 교육 강화, 맞춤형 프로그램 운영
+  icon: 🌏
+:::
+```
+
+:::cards
+title: 5대 핵심 교육 미션
+subtitle: CORE EDUCATION MISSION
+columns: 3
+variant: elevated
+
+- title: AI·SW 전문인력 양성
+  description: 이론과 실무를 겸비한 AI·SW 전문 교육으로 실무형 인재 양성
+  icon: 🎯
+
+- title: 실효성 있는 산학협력
+  description: 산학협력 프로젝트, 채용연계형 인턴십을 통한 실무 역량 교육
+  icon: 🤝
+
+- title: AI·SW 가치확산
+  description: 공교육 내 AI·SW 교육 강화, 맞춤형 프로그램 운영
+  icon: 🌏
+:::
+
+---
+
+## ④ panel — 아이콘+제목+목록 패널
+
+파란 헤더바 아래 그리드로 나열합니다.
+
+**목록형** (`items`에 `|` 파이프로 구분):
+
+```
+:::panel
+header: AI융합교육원 사업추진체계
+headersub: Organization
+columns: 3
+
+- icon: 📚
+  title: 기초교육부
+  items: AI기본교육 전략수립 | AI기초교육과정 운영 | 교육콘텐츠 공동개발
+
+- icon: 🎓
+  title: 전공교육부
+  items: AI대학 연계 및 인프라 구축 | 전공특화트랙 운영
+
+- icon: 🔗
+  title: 융합교육부
+  items: AI융합연계전공 운영 | 개방형 온라인과정 운영
+:::
+```
+
+:::panel
+header: AI융합교육원 사업추진체계
+headersub: Organization
+columns: 3
+
+- icon: 📚
+  title: 기초교육부
+  items: AI기본교육 전략수립 | AI기초교육과정 운영 | 교육콘텐츠 공동개발
+
+- icon: 🎓
+  title: 전공교육부
+  items: AI대학 연계 및 인프라 구축 | 전공특화트랙 운영
+
+- icon: 🔗
+  title: 융합교육부
+  items: AI융합연계전공 운영 | 개방형 온라인과정 운영
+:::
+
+**설명형** (`desc`로 한 줄 설명):
+
+```
+:::panel
+header: 8개 AI·SW 전공 특화 트랙
+headersub: SPECIALIZED CURRICULUM TRACKS
+columns: 4
+
+- icon: ☁️
+  title: 클라우드
+  desc: 클라우드 시장 연 18% 성장. 2030년 약 80만 명 신규 일자리 창출 전망
+
+- icon: 🔒
+  title: 융합보안
+  desc: 차세대 보안 세계시장 연평균 15.33% 성장
+
+- icon: 🤖
+  title: 생성AI
+  desc: 글로벌 시장 연평균 20% 이상 성장
+
+- icon: 🧠
+  title: 인공지능응용
+  desc: 글로벌 시장 2030년까지 연평균 30% 이상 성장 전망
+:::
+```
+
+:::panel
+header: 8개 AI·SW 전공 특화 트랙
+headersub: SPECIALIZED CURRICULUM TRACKS
+columns: 4
+
+- icon: ☁️
+  title: 클라우드
+  desc: 클라우드 시장 연 18% 성장. 2030년 약 80만 명 신규 일자리 창출 전망
+
+- icon: 🔒
+  title: 융합보안
+  desc: 차세대 보안 세계시장 연평균 15.33% 성장
+
+- icon: 🤖
+  title: 생성AI
+  desc: 글로벌 시장 연평균 20% 이상 성장
+
+- icon: 🧠
+  title: 인공지능응용
+  desc: 글로벌 시장 2030년까지 연평균 30% 이상 성장 전망
+:::
+
+---
+
+## ⑤ stepper — 단계별 프로세스
+
+단계를 가로로 나란히 보여주는 로드맵 블록입니다.
+
+```
+:::stepper
+header: 3단계 추진 로드맵 · 2023–2028
+headersub: THREE-PHASE ROADMAP
+
+- phase: 1단계
+  period: 2023–2024
+  title: AI·SW 교육체계 재정비
+  items: 8개 전공트랙 신설 | 인공지능 공동학과 신설 | PNU DevCloud 구축
+
+- phase: 2단계
+  period: 2025–2026
+  title: 맞춤형 교육 내실화
+  items: SMART-PNU 교육혁신모델 내실화 | 산학협력 선순환 체계 구축
+
+- phase: 3단계
+  period: 2027–2028
+  title: 성과 분석 및 공유확산
+  items: PNU-ICEx 성과 관리 | 취업연계 인턴십 성과 확산
+:::
+```
+
+:::stepper
+header: 3단계 추진 로드맵 · 2023–2028
+headersub: THREE-PHASE ROADMAP
+
+- phase: 1단계
+  period: 2023–2024
+  title: AI·SW 교육체계 재정비
+  items: 8개 전공트랙 신설 | 인공지능 공동학과 신설 | PNU DevCloud 구축
+
+- phase: 2단계
+  period: 2025–2026
+  title: 맞춤형 교육 내실화
+  items: SMART-PNU 교육혁신모델 내실화 | 산학협력 선순환 체계 구축
+
+- phase: 3단계
+  period: 2027–2028
+  title: 성과 분석 및 공유확산
+  items: PNU-ICEx 성과 관리 | 취업연계 인턴십 성과 확산
+:::
+
+---
+
+## ⑥ strategy — 전략 카드
+
+어두운 그라데이션 배경에 전략 카드를 배치합니다.
+
+```
+:::strategy
+title: 4C 추진전략
+subtitle: STRATEGIC FRAMEWORK
+
+- letter: C
+  title: Customized Education
+  desc: 신기술 반영 교육과정 기반 맞춤형 교육혁신
+
+- letter: C
+  title: Convergence Research
+  desc: 미래지향적 융합 연구 및 성과 창출
+
+- letter: C
+  title: Cooperative Industry-Univ.
+  desc: 소통·관계 중심 산학협력 네트워크 강화
+
+- letter: C
+  title: Connected Regional Community
+  desc: SW가치확산 지역거점 AI·SW 허브 구축
+:::
+```
+
+:::strategy
+title: 4C 추진전략
+subtitle: STRATEGIC FRAMEWORK
+
+- letter: C
+  title: Customized Education
+  desc: 신기술 반영 교육과정 기반 맞춤형 교육혁신
+
+- letter: C
+  title: Convergence Research
+  desc: 미래지향적 융합 연구 및 성과 창출
+
+- letter: C
+  title: Cooperative Industry-Univ.
+  desc: 소통·관계 중심 산학협력 네트워크 강화
+
+- letter: C
+  title: Connected Regional Community
+  desc: SW가치확산 지역거점 AI·SW 허브 구축
+:::
+
+---
+
+## ⑦ alphagrid — 알파벳 뱃지 그리드
+
+알파벳 뱃지+설명을 그리드로 나열합니다.
+
+```
+:::alphagrid
+title: SMARTPNU — 8가지 인재상
+subtitle: TALENT MODEL
+columns: 4
+
+- letter: S
+  label: 문제해결형 혁신인재
+  sub: Software
+
+- letter: M
+  label: 미래지향적 혁신인재
+  sub: Medoid
+
+- letter: A
+  label: 자기주도형 혁신인재
+  sub: AIMCSD
+
+- letter: R
+  label: 지역 혁신인재
+  sub: Region
+:::
+```
+
+:::alphagrid
+title: SMARTPNU — 8가지 인재상
+subtitle: TALENT MODEL
+columns: 4
+
+- letter: S
+  label: 문제해결형 혁신인재
+  sub: Software
+
+- letter: M
+  label: 미래지향적 혁신인재
+  sub: Medoid
+
+- letter: A
+  label: 자기주도형 혁신인재
+  sub: AIMCSD
+
+- letter: R
+  label: 지역 혁신인재
+  sub: Region
+:::
+
+---
+
+## ⑧ split — 좌우 분할 패널
+
+왼쪽(통계·다크)과 오른쪽(목록·라이트)을 나란히 배치합니다.
+
+```
+:::split
+left-header: 부산대–경북대 인공지능 공동학과
+left-sub: Joint AI Department · 전국 최초
+left-dark: true
+right-header: 융합교육 혁신 4방향
+right-sub: Convergence Strategy
+
+left:
+- label: 부산대학교
+  value: 68명
+  desc: AI Software 특화 교과목 주관
+
+- label: 경북대학교
+  value: 60명
+  desc: AI Hardware 특화 교과목 주관
+
+- label: 총 정원
+  value: 128명
+  desc: 전국 최초 인공지능 공동학과
+
+right:
+- num: "①"
+  title: 융합교육체계 다변화
+  desc: AI·SW융합트랙(14개) 추가. 수요별 다양한 융합 교육 과정
+
+- num: "②"
+  title: 융합 범위 확장
+  desc: 이공계 중심에서 인문·사회 포함 전 분야로 확장
+:::
+```
+
+:::split
+left-header: 부산대–경북대 인공지능 공동학과
+left-sub: Joint AI Department · 전국 최초
+left-dark: true
+right-header: 융합교육 혁신 4방향
+right-sub: Convergence Strategy
+
+left:
+- label: 부산대학교
+  value: 68명
+  desc: AI Software 특화 교과목 주관
+
+- label: 경북대학교
+  value: 60명
+  desc: AI Hardware 특화 교과목 주관
+
+- label: 총 정원
+  value: 128명
+  desc: 전국 최초 인공지능 공동학과
+
+right:
+- num: "①"
+  title: 융합교육체계 다변화
+  desc: AI·SW융합트랙(14개) 추가. 수요별 다양한 융합 교육 과정
+
+- num: "②"
+  title: 융합 범위 확장
+  desc: 이공계 중심에서 인문·사회 포함 전 분야로 확장
+:::
+
+---
+
+## 기타 컴포넌트 (JSX)
+
+아래 컴포넌트는 JSX 문법을 사용합니다. 특수한 상황에서만 쓰세요.
+
+### Callout — 알림 박스
 
 <Callout type="info" title="안내드립니다">
   본 교육 과정은 부산대학교 학생이라면 누구나 신청 가능합니다.
 </Callout>
 
 <Callout type="success" title="접수 완료">
-  서류 접수가 정상적으로 처리되었습니다. 결과는 개별 통보됩니다.
+  서류 접수가 정상적으로 처리되었습니다.
 </Callout>
 
 <Callout type="warning" title="주의사항">
-  신청 기간 이후에는 수정이 불가능하므로 신중하게 입력해주세요.
+  신청 기간 이후에는 수정이 불가능합니다.
 </Callout>
 
 <Callout type="danger" title="긴급 공지">
-  시스템 점검으로 인해 오늘 오후 6시부터 서비스가 일시 중단됩니다.
+  시스템 점검으로 인해 서비스가 일시 중단됩니다.
 </Callout>
 
----
+```jsx
+<Callout type="info" title="안내">내용</Callout>
+// type: info | success | warning | danger
+```
 
-## 6. 신청 및 추진 절차 (Step List)
-
-단계별로 진행되는 절차를 시각적으로 보여줍니다.
+### StepList — 단계 절차
 
 <StepList>
   <StepItem step="1" title="온라인 신청 접수">
@@ -189,11 +486,7 @@ theme: blue
   </StepItem>
 </StepList>
 
----
-
-## 7. 자주 묻는 질문 (FAQ/Details)
-
-많은 내용을 깔끔하게 정리하거나 FAQ를 만들 때 유용합니다.
+### Details — FAQ 접기/펼치기
 
 <Details summary="Q. 수강료는 얼마인가요?">
   본 교육원은 전액 국비 지원으로 운영되므로 별도의 수강료가 발생하지 않습니다.
@@ -205,64 +498,19 @@ theme: blue
 
 ---
 
-## 8. 글자 크기 및 스타일 (Text)
+## AI에게 새 챕터 작성 요청할 때 프롬프트
 
-`<Text>` 컴포넌트를 사용하면 마크다운 안에서도 글자 크기, 굵기, 색상을 자유롭게 조절할 수 있습니다.
-
-### 폰트 굵기 미리보기 (Weight Preview)
-
-<div style={{ background: '#fff', padding: '32px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-  {[100, 200, 300, 400, 500, 600, 700, 800, 900].map(w => (
-    <div key={w} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0', borderBottom: w === 900 ? 'none' : '1px solid #f1f5f9' }}>
-      <Text size="28" weight={w}>세상에 이런 폰트가 나오다니 천재인듯</Text>
-      <Text size="14" color="#94a3b8" weight="700">{w}</Text>
-    </div>
-  ))}
-</div>
-
-<br/>
-
-```jsx
-<Text size="28" weight="900">굵은 강조 텍스트</Text>
 ```
+아래 텍스트 자료를 바탕으로 Docusaurus md 파일을 작성해줘.
 
-<br/>
+규칙:
+1. 반드시 ::: 디렉티브 문법만 사용 (99-template.md 참고)
+2. JSX, HTML 코드는 절대 쓰지 말 것
+3. 파일 맨 위에 frontmatter(id, title, sidebar_position, theme: public-blue) 넣을 것
+4. hero 블록을 가장 먼저, 그 다음 kpi → panel/cards/stepper 순으로 배치
+5. 빈 공간 없이 내용을 꽉 채울 것
 
-### 폰트 종류 미리보기 (Font Family)
+사용 가능한 블록: hero, kpi, cards, panel, stepper, strategy, alphagrid, split
 
-다양한 느낌을 줄 수 있는 4가지 대표 폰트를 즉시 사용할 수 있습니다.
-
-<div style={{ background: '#fff', padding: '32px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-  <div style={{ marginBottom: '24px', borderBottom: '1px solid #f1f5f9', paddingBottom: '16px' }}>
-    <Text size="14" color="#94a3b8" weight="700" display="block" style={{ marginBottom: '8px' }}>PRETENDARD (가장 범용적인 서체)</Text>
-    <Text size="32" family="pretendard" weight="700">모든 국민은 인간으로서의 존엄과 가치를 가지며</Text>
-  </div>
-  <div style={{ marginBottom: '24px', borderBottom: '1px solid #f1f5f9', paddingBottom: '16px' }}>
-    <Text size="14" color="#94a3b8" weight="700" display="block" style={{ marginBottom: '8px' }}>GMARKET SANS (제목용으로 추천)</Text>
-    <Text size="32" family="gmarket" weight="700">행복을 추구할 권리를 가진다. 국가는 확인한다.</Text>
-  </div>
-  <div style={{ marginBottom: '24px', borderBottom: '1px solid #f1f5f9', paddingBottom: '16px' }}>
-    <Text size="14" color="#94a3b8" weight="700" display="block" style={{ marginBottom: '8px' }}>NANUM GOTHIC (친숙하고 부드러운 서체)</Text>
-    <Text size="32" family="nanum" weight="700">기본적 인권을 확인하고 이를 보장할 의무를 진다.</Text>
-  </div>
-  <div>
-    <Text size="14" color="#94a3b8" weight="700" display="block" style={{ marginBottom: '8px' }}>NOTO SANS KR (기본 서체)</Text>
-    <Text size="32" family="noto" weight="700">국가는 개인이 가지는 불가침의 인권을 확인한다.</Text>
-  </div>
-</div>
-
-<br/>
-
-```jsx
-<Text family="gmarket" size="40" weight="700">지마켓 산스 타이틀</Text>
-<Text family="pretendard" size="20">프리텐다드 본문</Text>
+[여기에 텍스트 자료 붙여넣기]
 ```
-
-<br/><br/>
-
-<br/><br/>
-
-### 💡 사용 방법
-1. 위 코드를 복사(Ctrl+C)합니다.
-2. 관리자 페이지(`우측 상단 톱니바퀴` -> `새 문서 작성`)를 엽니다.
-3. `Markdown` 탭에 붙여넣기(Ctrl+V) 한 뒤, 원하는 텍스트만 쏙쏙 바꿔서 사용하세요! 

@@ -8,24 +8,26 @@ import path from 'path';
 function getDynamicNavItems() {
   const docsDir = path.join(process.cwd(), 'docs');
   if (!fs.existsSync(docsDir)) return [];
-  
+
   const files = fs.readdirSync(docsDir).filter(f => f.endsWith('.md') || f.endsWith('.mdx'));
-  
-  // 정렬을 위해 파일명(예: 01-intro.md)을 기준으로 정렬
   files.sort();
 
-  return files.map(file => {
+  return files.map((file, index) => {
     const content = fs.readFileSync(path.join(docsDir, file), 'utf8');
-    const titleMatch = content.match(/title:\s*"?([^"\n]+)"?/);
-    const title = titleMatch ? titleMatch[1] : file.replace('.md', '');
-    const idMatch = content.match(/id:\s*"?([^"\n]+)"?/);
-    const id = idMatch ? idMatch[1] : file.replace('.md', '');
-    
-    return {
-      to: '/docs/' + id,
-      label: title,
-    };
-  });
+    const navLabelMatch = content.match(/^nav_label:\s*"?([^"\n]+)"?/m);
+    const titleMatch = content.match(/^title:\s*"?([^"\n]+)"?/m);
+    const label = navLabelMatch ? navLabelMatch[1].trim()
+                : titleMatch    ? titleMatch[1].trim()
+                : file.replace(/\.mdx?$/, '');
+    const idMatch = content.match(/^id:\s*"?([^"\n]+)"?/m);
+    const id = idMatch ? idMatch[1].trim() : file.replace(/\.mdx?$/, '');
+    const posMatch = content.match(/^sidebar_position:\s*(\d+)/m);
+    const pos = posMatch ? parseInt(posMatch[1], 10) : index + 1;
+    const numMatch = file.match(/^(\d+)/);
+    const num = numMatch ? numMatch[1] : String(pos).padStart(2, '0');
+
+    return { num, label, to: '/docs/' + id, pos };
+  }).sort((a, b) => a.pos - b.pos);
 }
 
 const dynamicNavItems = getDynamicNavItems();
@@ -37,7 +39,8 @@ const config = {
   
   customFields: {
     firstDocLink,
-    defaultLayout: "standard", // "slim", "compact", "standard", "poster", "cinema"
+    navItems: dynamicNavItems,
+    defaultLayout: "cinema", // "slim", "compact", "standard", "poster", "cinema"
   },
 
   tagline: "부산대학교 AI융합교육원 온라인 브로슈어",
@@ -73,6 +76,7 @@ const config = {
       {
         docs: {
           sidebarPath: "./sidebars.js",
+          routeBasePath: '/docs',
           remarkPlugins: [
             require('remark-directive'),
             require('./src/theme/remarkBrochureDirectives'),
@@ -115,18 +119,6 @@ const config = {
       },
 
       items: [
-        {
-          type: 'dropdown',
-          label: '브로슈어 목차',
-          position: 'right',
-          items: dynamicNavItems,
-        },
-        {
-          to: "/admin/",
-          position: "right",
-          label: "관리 페이지",
-          target: "_blank",
-        },
         {
           href: "https://pnuai.github.io",
           position: "right",

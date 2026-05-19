@@ -26,15 +26,15 @@ export default function StatsSection({ title, subtitle, items }) {
       {(title || subtitle) && (
         <div className="bb-section-header" style={{ marginBottom: '32px' }}>
           {subtitle && <span className="bb-section-subtitle" style={{
-            fontSize: '11.5px',
+            fontSize: '15px',
             fontWeight: '700',
             letterSpacing: '0.1em',
             textTransform: 'uppercase',
             display: 'inline-block',
-            marginBottom: '8px'
+            marginBottom: '10px'
           }}>{subtitle}</span>}
           {title && <h3 className="bb-section-title" style={{
-            fontSize: '22px',
+            fontSize: '38px',
             fontWeight: '800',
             margin: '0',
             letterSpacing: '-0.02em'

@@ -67,61 +67,104 @@ body {
   font-family: "Noto Sans KR", sans-serif;
 }
 
-/* 메인 레이아웃 (좌측 밀착) */
+/* ── docs 전체 레이아웃: 화면 꽉 참 ── */
+
+/* 외부 래퍼 */
 .main-wrapper {
-  padding-top: 30px;
-  padding-bottom: 80px;
-  background: var(--bg);
-  max-width: 100% !important; /* 바깥쪽은 제한을 품 */
-  margin: 0;
-  padding-left: 48px;
-  width: 100%;
-}
-
-/* Docusaurus 기본 컨테이너 너비 제한 해제 */
-.main-wrapper .container {
-  max-width: 100% !important;
-  width: 100% !important;
   padding: 0 !important;
-}
-
-/* 문서 영역 (실제 종이 규격이 적용되는 부분) */
-
-.theme-doc-markdown {
-  background: white;
-  width: 100%;
-  max-width: var(--content-max-width) !important; /* 안쪽 네모에 규격 적용 */
-  padding: 40px 50px; /* 여백을 넉넉히 주어 고급스러운 느낌 유지 */
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.02);
-  transition: max-width 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* 규격 변경 시 부드럽게 */
-}
-
-/* 컬럼 및 본문 확장 보장 (줄바꿈 방지 및 우측 여백 제거) */
-main,
-main.docMainContainer_gT6v,
-main[class*="docMainContainer_"] {
-  flex-grow: 1 !important;
+  margin: 0 !important;
   width: 100% !important;
   max-width: 100% !important;
+  background: #f0f4f8;
 }
 
-main .row {
-  display: flex;
-  flex-wrap: nowrap !important; /* 강제로 한 줄에 배치 */
-  gap: 32px;
+/* docsWrapper, docRoot — 사이드바+메인을 감싸는 flex 컨테이너 */
+[class*="docsWrapper"],
+[class*="docRoot"] {
   width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
   margin: 0 !important;
 }
 
-/* 본문 영역은 남은 공간만 꽉 채우도록 설정 */
-main .row > .col:not(.col--3),
-div[class*="docItemCol_"],
-div[class*="docItemContainer_"] {
-  flex: 1 1 0% !important;
+/* 사이드바, TOC 완전 제거 (공간도 0으로) */
+aside.theme-doc-sidebar-container,
+[class*="docSidebarContainer"] {
+  display: none !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  flex: none !important;
+}
+
+.col.col--3,
+nav[class*="tableOfContents"],
+div[class*="tocCollapsible"],
+.theme-doc-toc-desktop,
+.theme-doc-toc-mobile {
+  display: none !important;
+}
+
+/* docs 메인: 전체 너비 차지 */
+[class*="docMainContainer"] {
+  flex: 1 1 100% !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-width: 0 !important;
+}
+
+/* docMainContainer > .container (padding-top--md padding-bottom--lg 클래스) */
+[class*="docMainContainer"] > div,
+[class*="docMainContainer"] > .container {
   max-width: 100% !important;
   width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* .row 안의 col */
+[class*="docMainContainer"] .row {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  gap: 0 !important;
+}
+
+[class*="docItemCol"],
+[class*="docItemContainer"],
+[class*="docMainContainer"] .col {
+  flex: 1 1 100% !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-width: 0 !important;
+}
+
+/* 페이지 하단 이전/다음 네비게이션 */
+.pagination-nav {
+  padding: 24px max(24px, calc((100vw - var(--content-max-width)) / 2)) !important;
+  margin: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* 문서 마크다운: 흰 박스 제거, 전체 너비 */
+.theme-doc-markdown {
+  background: transparent !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 /* =========================================
@@ -236,64 +279,6 @@ div[class*="docItemContainer_"] {
   border-radius: 8px;
 }
 
-/* =========================================
-   사이드바 및 목차(TOC) 레이아웃 변경 
-   ========================================= */
-
-/* 기본 문서 목록 사이드바 숨기기 */
-aside.theme-doc-sidebar-container {
-  display: none !important;
-}
-
-/* 본문 레이아웃에서 목차(TOC)를 왼쪽으로 이동 */
-main .col--3 {
-  order: -1; /* 목차를 제일 왼쪽으로 보냄 */
-  flex: 0 0 250px !important;
-  max-width: 250px !important;
-  width: 250px !important;
-}
-
-/* 목차(TOC) 블록 디자인 (참조 사이트 .sidebar 스타일 적용) */
-.theme-doc-toc-desktop {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 16px 8px;
-  box-shadow: 0 1px 8px rgba(0,0,0,.07);
-  position: sticky;
-  top: 90px; /* 네비게이션바 아래로 고정 */
-  width: 250px;
-  min-width: 250px;
-}
-
-/* 목차 링크 아이템 디자인 */
-.table-of-contents__link {
-  font-size: 13px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  color: #64748b;
-  border-left: 3px solid transparent;
-  margin-bottom: 2px;
-  display: block;
-  transition: all 0.2s ease;
-}
-
-.table-of-contents__link:hover {
-  background: rgba(37, 99, 235, 0.06);
-  color: var(--blue);
-  text-decoration: none;
-}
-
-.table-of-contents__link--active {
-  background: var(--pale);
-  color: var(--blue);
-  border-left-color: var(--mid);
-  font-weight: 700;
-}
-
-/* 안쪽 목차(하위 헤딩) 들여쓰기 조정 */
-.table-of-contents ul {
-  padding-left: 10px;
-}
 
 /* 제목 */
 
@@ -434,161 +419,7 @@ main .col--3 {
   background: linear-gradient(135deg, #7c3aed, #8b5cf6);
 }
 
-/* =========================
-   HOME PAGE
-========================= */
-
-.home-main {
-  max-width: 860px;
-  margin: 0 auto;
-  padding: 80px 24px 120px;
-}
-
-/* Hero */
-.home-hero {
-  margin-bottom: 72px;
-}
-
-.home-hero__badge {
-  display: inline-block;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #2563eb;
-  background: #eff6ff;
-  border-radius: 999px;
-  padding: 6px 14px;
-  margin-bottom: 28px;
-}
-
-.home-hero__title {
-  font-size: 3.6rem;
-  font-weight: 800;
-  line-height: 1.15;
-  letter-spacing: -0.03em;
-  color: #111827;
-  margin-bottom: 24px;
-}
-
-.home-hero__desc {
-  font-size: 1.1rem;
-  line-height: 1.9;
-  color: #6b7280;
-  margin: 0;
-}
-
-/* Chapter list heading */
-.home-chapters__heading {
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #9ca3af;
-  margin-bottom: 20px;
-  border: none !important;
-  padding: 0 !important;
-}
-
-.home-chapter-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* Card */
-.home-chapter-card {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  padding: 28px 32px;
-  background: var(--card-bg);
-  border-radius: 20px;
-  border: 1.5px solid transparent;
-  text-decoration: none !important;
-  transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.home-chapter-card::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  background: var(--card-accent);
-  border-radius: 4px 0 0 4px;
-  transition: width 0.2s ease;
-}
-
-.home-chapter-card:hover {
-  transform: translateX(4px);
-  border-color: var(--card-accent);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.07);
-}
-
-.home-chapter-card:hover::before {
-  width: 6px;
-}
-
-.home-chapter-card__num {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--card-accent);
-  font-variant-numeric: tabular-nums;
-  min-width: 40px;
-  opacity: 0.6;
-  letter-spacing: -0.02em;
-}
-
-.home-chapter-card__body {
-  flex: 1;
-}
-
-.home-chapter-card__title {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #111827;
-  margin: 0 0 4px;
-}
-
-.home-chapter-card__desc {
-  font-size: 0.92rem;
-  color: #6b7280;
-  line-height: 1.6;
-  margin: 0;
-}
-
-.home-chapter-card__arrow {
-  font-size: 1.2rem;
-  color: var(--card-accent);
-  opacity: 0;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  transform: translateX(-4px);
-}
-
-.home-chapter-card:hover .home-chapter-card__arrow {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-@media screen and (max-width: 640px) {
-  .home-hero__title {
-    font-size: 2.4rem;
-  }
-
-  .home-chapter-card {
-    padding: 22px 20px;
-    gap: 16px;
-  }
-
-  .home-chapter-card__num {
-    font-size: 1.1rem;
-    min-width: 28px;
-  }
-}
+/* HOME PAGE styles moved to src/pages/index.module.css */
 
 /* =========================
    PDF / PRINT SYSTEM
@@ -649,6 +480,34 @@ main .col--3 {
   margin: 2.5rem 0 1.5rem !important;
   line-height: 1.2 !important;
   border: none !important;
+}
+
+/* 어두운 배경 섹션(hero, cta) 내부 — 전역 타이포 override 차단 */
+.bb-hero h1, .bb-hero h2, .bb-hero h3,
+.bb-hero .bb-hero-title {
+  color: #ffffff !important;
+  border: none !important;
+  padding: 0 !important;
+  margin-bottom: 20px !important;
+}
+
+.bb-hero p, .bb-hero .bb-hero-desc {
+  color: rgba(255, 255, 255, 0.85) !important;
+  border: none !important;
+  background: none !important;
+}
+
+.bb-cta h1, .bb-cta h2, .bb-cta h3,
+.bb-cta .bb-cta-title {
+  color: #ffffff !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+.bb-cta p, .bb-cta .bb-cta-desc {
+  color: rgba(255, 255, 255, 0.85) !important;
+  border: none !important;
+  background: none !important;
 }
 
 .markdown h2,
@@ -911,9 +770,9 @@ main .col--3 {
 
 /* ── Base Section ── */
 .bb-section {
-  padding: 56px 40px;
-  border-radius: 20px !important;
-  margin-bottom: 24px !important;
+  padding: 56px max(24px, calc((100vw - var(--content-max-width)) / 2));
+  border-radius: 0 !important;
+  margin-bottom: 0 !important;
   font-family: var(--theme-font-family) !important;
   background: transparent !important;
   position: relative;
@@ -924,19 +783,19 @@ main .col--3 {
 }
 
 @media (max-width: 768px) {
-  .bb-section { padding: 40px 20px !important; }
+  .bb-section { padding: 36px 20px !important; }
 }
 
 /* Section header */
-.bb-section-header { margin-bottom: 32px; }
+.bb-section-header { margin-bottom: 28px; }
 
 .bb-section-subtitle {
   display: inline-block;
-  font-size: 11px !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.12em;
+  font-size: 10.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   background: var(--theme-gradient-primary) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
@@ -944,9 +803,9 @@ main .col--3 {
 }
 
 .bb-section-title {
-  font-size: 22px !important;
-  font-weight: 800 !important;
-  letter-spacing: -0.02em;
+  font-size: 20px !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.03em;
   color: var(--theme-primary) !important;
   margin: 0 !important;
   line-height: 1.2 !important;
@@ -958,20 +817,25 @@ main .col--3 {
 .bb-hero {
   background: var(--theme-hero-bg) !important;
   color: #fff !important;
-  min-height: 400px;
+  min-height: 520px;
   display: flex !important;
   flex-direction: column;
   justify-content: center;
-  border: 1px solid rgba(255,255,255,0.1) !important;
-  box-shadow: 0 24px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.04) !important;
+  border: none !important;
+  box-shadow: 0 8px 40px rgba(21, 101, 192, 0.35) !important;
+  padding: 80px max(40px, calc((100vw - var(--content-max-width)) / 2)) !important;
   -webkit-print-color-adjust: exact !important;
   print-color-adjust: exact !important;
+}
+
+@media (max-width: 768px) {
+  .bb-hero { padding: 52px 28px !important; min-height: 420px; }
 }
 
 .bb-hero-content {
   position: relative;
   z-index: 2;
-  max-width: 720px;
+  max-width: 900px;
 }
 
 .bb-hero-badge {
@@ -979,35 +843,51 @@ main .col--3 {
   align-items: center;
   gap: 8px;
   font-size: 11px !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.12em;
+  font-weight: 800 !important;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.75) !important;
-  padding: 6px 14px;
-  border: 1px solid rgba(255,255,255,0.15) !important;
-  background: rgba(255,255,255,0.08) !important;
-  border-radius: 100px !important;
-  margin-bottom: 28px;
+  color: rgba(255,255,255,0.9) !important;
+  padding: 6px 16px;
+  border: 1px solid rgba(255,255,255,0.2) !important;
+  background: rgba(255,255,255,0.1) !important;
+  border-radius: 4px !important;
+  margin-bottom: 32px;
+}
+
+.bb-hero-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--theme-accent) !important;
+  flex-shrink: 0;
 }
 
 .bb-hero-title {
-  font-size: clamp(1.8rem, 4vw, 3rem) !important;
+  font-size: clamp(2rem, 4vw, 3.2rem) !important;
   font-weight: 900 !important;
-  line-height: 1.15 !important;
-  letter-spacing: -0.04em !important;
+  line-height: 1.18 !important;
+  letter-spacing: -0.03em !important;
   color: #ffffff !important;
   margin-bottom: 20px !important;
   word-break: keep-all;
+  overflow-wrap: break-word;
   border: none !important;
   padding: 0 !important;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.25);
+}
+
+.bb-hero-title em {
+  font-style: normal;
+  color: var(--theme-accent) !important;
 }
 
 .bb-hero-desc {
   font-size: 1rem !important;
-  line-height: 1.75 !important;
-  color: rgba(255,255,255,0.7) !important;
+  line-height: 1.8 !important;
+  color: rgba(255,255,255,0.85) !important;
   margin-bottom: 36px !important;
   word-break: keep-all;
+  max-width: 620px;
 }
 
 .bb-hero-deco {
@@ -1021,20 +901,55 @@ main .col--3 {
   position: absolute;
   border-radius: 50%;
   filter: blur(100px);
-  opacity: 0.22;
+  opacity: 0.18;
 }
 
 .bb-hero-deco span:nth-child(1) {
   width: 500px; height: 500px;
-  top: -150px; right: -100px;
-  background: var(--theme-primary-light) !important;
+  top: -180px; right: -120px;
+  background: #5b9cf6 !important;
 }
 
 .bb-hero-deco span:nth-child(2) {
   width: 350px; height: 350px;
-  bottom: -100px; left: -50px;
+  bottom: -100px; left: -60px;
   background: var(--theme-accent) !important;
+  opacity: 0.12;
 }
+
+.bb-hero-deco span:nth-child(3) {
+  width: 250px; height: 250px;
+  top: 50%; left: 60%;
+  transform: translateY(-50%);
+  background: #2563eb !important;
+  opacity: 0.1;
+}
+
+/* Hero 전용 버튼 */
+.bb-hero-btn {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 10px;
+  background: var(--theme-accent) !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  font-size: 15px !important;
+  padding: 14px 30px;
+  border-radius: 6px !important;
+  text-decoration: none !important;
+  box-shadow: 0 6px 24px rgba(230, 51, 18, 0.45) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  letter-spacing: -0.01em;
+}
+
+.bb-hero-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 32px rgba(230, 51, 18, 0.6) !important;
+  color: #ffffff !important;
+}
+
+.bb-hero-btn svg { transition: transform 0.2s; }
+.bb-hero-btn:hover svg { transform: translateX(4px); }
 
 /* ── 2. STATS ── */
 .bb-stats-grid {
@@ -1083,10 +998,10 @@ main .col--3 {
 }
 
 .bb-stat-value {
-  font-size: clamp(1.7rem, 3vw, 2.5rem) !important;
+  font-size: clamp(2rem, 3.5vw, 2.8rem) !important;
   font-weight: 900 !important;
   line-height: 1 !important;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.05em;
   background: var(--theme-gradient-primary) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
@@ -1744,6 +1659,19 @@ main .col--3 {
   color: var(--theme-primary-mid) !important;
   border-color: var(--theme-border) !important;
   background: var(--theme-background) !important;
+}
+
+/* TOC 앵커용 숨김 헤딩 — 사이드바에는 표시되고 본문에는 안 보임 */
+.toc-anchor-heading {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
 
 

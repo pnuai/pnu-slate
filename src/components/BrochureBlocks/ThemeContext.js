@@ -6,23 +6,23 @@ export const themes = {
   'public-blue': {
     name: 'public-blue',
     tokens: {
-      primary: '#002260',      // 부산대 딥 네이비
-      primaryMid: '#026bff',   // 미디엄 블루
-      primaryLight: '#5092ff', // 스카이 블루
-      accent: '#e34c4b',       // 포인트 레드
-      accentSoft: '#ec7b7d',   // 소프트 레드
+      primary: '#0b1f4e',      // 참조 사이트 딥 네이비
+      primaryMid: '#1757c2',   // 미디엄 블루
+      primaryLight: '#4a82e4', // 스카이 블루
+      accent: '#e63312',       // 참조 사이트 포인트 레드
+      accentSoft: '#ff5533',   // 소프트 레드
       teal: '#6fcbae',
-      background: '#f8fafc',
+      background: '#f0f4f8',
       cardBg: '#ffffff',
-      border: '#d0dbe8',
+      border: '#c8d8ec',
       fontFamily: '"Pretendard", "Noto Sans KR", -apple-system, sans-serif',
-      radius: '12px',
-      radiusCard: '16px',
-      shadow: '0 4px 16px rgba(0, 34, 96, 0.08)',
-      shadowCard: '0 2px 12px rgba(0, 34, 96, 0.10)',
-      gradientPrimary: 'linear-gradient(135deg, #002260 0%, #026bff 100%)',
-      gradientAccent: 'linear-gradient(135deg, #e34c4b 0%, #f57100 100%)',
-      heroBg: 'linear-gradient(145deg, #040d1a 0%, #0a1e3f 40%, #1a4fa0 80%, #0c4a6e 100%)',
+      radius: '8px',
+      radiusCard: '12px',
+      shadow: '0 4px 20px rgba(11, 31, 78, 0.12)',
+      shadowCard: '0 2px 14px rgba(11, 31, 78, 0.10)',
+      gradientPrimary: 'linear-gradient(135deg, #0b1f4e 0%, #1757c2 100%)',
+      gradientAccent: 'linear-gradient(135deg, #e63312 0%, #ff7a00 100%)',
+      heroBg: 'linear-gradient(135deg, #1565c0 0%, #1976d2 30%, #42a5f5 60%, #1e88e5 80%, #1565c0 100%)',
     }
   },
   'startup-gradient': {
