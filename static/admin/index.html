@@ -928,6 +928,38 @@ function setMarkdownPreservingScroll(markdown) {
   }, 30);
 }
 
+// 이미지 정렬 선택 팝업: 업로드 완료 후 호출, resolve(align) → 'left'|'center'|'right'
+function askImageAlign() {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+      position:fixed;inset:0;z-index:99999;
+      display:flex;align-items:center;justify-content:center;
+      background:rgba(0,0,0,0.35);backdrop-filter:blur(2px);
+    `;
+    overlay.innerHTML = `
+      <div style="background:#fff;border-radius:18px;padding:28px 32px;box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:center;min-width:280px">
+        <div style="font-size:.78rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#9ca3af;margin-bottom:10px">이미지 정렬</div>
+        <div style="font-size:1rem;font-weight:700;color:#111827;margin-bottom:22px">삽입 위치를 선택하세요</div>
+        <div style="display:flex;gap:10px;justify-content:center">
+          <button data-align="left"   style="flex:1;padding:12px 0;border-radius:10px;border:1.5px solid #e5e7eb;background:#f9fafb;font-size:.88rem;font-weight:700;cursor:pointer;font-family:inherit;color:#374151;transition:all .15s">◀ 왼쪽</button>
+          <button data-align="center" style="flex:1;padding:12px 0;border-radius:10px;border:1.5px solid #2563eb;background:#eff6ff;font-size:.88rem;font-weight:700;cursor:pointer;font-family:inherit;color:#2563eb;transition:all .15s">● 가운데</button>
+          <button data-align="right"  style="flex:1;padding:12px 0;border-radius:10px;border:1.5px solid #e5e7eb;background:#f9fafb;font-size:.88rem;font-weight:700;cursor:pointer;font-family:inherit;color:#374151;transition:all .15s">▶ 오른쪽</button>
+        </div>
+      </div>
+    `;
+    overlay.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('mouseenter', () => { btn.style.transform = 'translateY(-2px)'; btn.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'; });
+      btn.addEventListener('mouseleave', () => { btn.style.transform = ''; btn.style.boxShadow = ''; });
+      btn.addEventListener('click', () => {
+        document.body.removeChild(overlay);
+        resolve(btn.dataset.align);
+      });
+    });
+    document.body.appendChild(overlay);
+  });
+}
+
 // 스튜디오 내 실시간 피드백 토스트 알림 메시지 (디버그 & 초프리미엄 UX 가미)
 function showStudioToast(message, type = 'success') {
   const container = document.getElementById('studio-toast-container') || (() => {
@@ -1055,10 +1087,19 @@ function initEditor() {
             throw new Error(errData.message || 'GitHub API upload failed');
           }
 
-          // 3. 에디터에는 raw URL로 삽입 (빌드 없이 즉시 프리뷰 가능)
-          //    저장 시 shortPath로 치환되어 MD 파일에는 짧은 경로가 저장됨
+          // 3. 정렬 선택 팝업 → 선택 후 에디터에 삽입
           rawUrlToShort.set(rawUrl, shortPath);
-          callback(rawUrl, filename);
+          const align = await askImageAlign();
+          if (align === 'center' || align === 'right') {
+            // callback 대신 직접 markdown 삽입: <div style="text-align:...">![...](url)</div>
+            const imgMd = `![${filename}](${rawUrl})`;
+            const wrapped = `\n<div style="text-align:${align}">\n\n${imgMd}\n\n</div>\n`;
+            // rawUrl 자체는 shortPath로 치환 매핑 유지
+            toastEditor.insertText(wrapped);
+          } else {
+            // 왼쪽(기본)은 callback으로 일반 삽입
+            callback(rawUrl, filename);
+          }
           showStudioToast('이미지 업로드 완료! 프리뷰에서 바로 확인하세요.', 'success');
         } catch (err) {
           console.error('[IMAGE_UPLOAD_ERROR]', err);
