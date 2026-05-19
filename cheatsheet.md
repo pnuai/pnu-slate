@@ -1,4 +1,4 @@
-## PNU Slate
+## PNU Modu
 
 ### Public AI Brochure Infrastructure — Architecture Notes & Project Overview
 
@@ -10,7 +10,7 @@
 
 이 문서는 단순한 README나 기술 문서가 아닙니다.
 
-PNU Slate 프로젝트를:
+PNU Modu 프로젝트를:
 
 - 왜 만들게 되었는지
 - 어떤 문제를 해결하기 위해 설계했는지
@@ -73,7 +73,7 @@ GitHub는 매우 강력한 플랫폼이지만,
 - 사용자는 CMS 인터페이스만 사용하며
 - 복잡한 Git 작업은 모두 시스템이 처리하도록 설계했습니다.
 
-이 철학이 PNU Slate 전체 구조의 핵심입니다.
+이 철학이 PNU Modu 전체 구조의 핵심입니다.
 
 ---
 

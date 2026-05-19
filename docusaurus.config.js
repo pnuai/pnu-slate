@@ -13,21 +13,23 @@ function getDynamicNavItems() {
   files.sort();
 
   return files.map((file, index) => {
-    const content = fs.readFileSync(path.join(docsDir, file), 'utf8');
-    const navLabelMatch = content.match(/^nav_label:\s*"?([^"\n]+)"?/m);
-    const titleMatch = content.match(/^title:\s*"?([^"\n]+)"?/m);
-    const label = navLabelMatch ? navLabelMatch[1].trim()
-                : titleMatch    ? titleMatch[1].trim()
-                : file.replace(/\.mdx?$/, '');
-    const idMatch = content.match(/^id:\s*"?([^"\n]+)"?/m);
-    const id = idMatch ? idMatch[1].trim() : file.replace(/\.mdx?$/, '');
-    const posMatch = content.match(/^sidebar_position:\s*(\d+)/m);
-    const pos = posMatch ? parseInt(posMatch[1], 10) : index + 1;
-    const numMatch = file.match(/^(\d+)/);
-    const num = numMatch ? numMatch[1] : String(pos).padStart(2, '0');
+      const content = fs.readFileSync(path.join(docsDir, file), 'utf8');
+      const navLabelMatch = content.match(/^nav_label:\s*"?([^"\n]+)"?/m);
+      const titleMatch = content.match(/^title:\s*"?([^"\n]+)"?/m);
+      const label = navLabelMatch ? navLabelMatch[1].trim()
+                  : titleMatch    ? titleMatch[1].trim()
+                  : file.replace(/\.mdx?$/, '');
+      const idMatch = content.match(/^id:\s*"?([^"\n]+)"?/m);
+      const id = idMatch ? idMatch[1].trim() : file.replace(/\.mdx?$/, '');
+      const posMatch = content.match(/^sidebar_position:\s*(\d+)/m);
+      const pos = posMatch ? parseInt(posMatch[1], 10) : index + 1;
+      const numMatch = file.match(/^(\d+)/);
+      const num = numMatch ? numMatch[1] : String(pos).padStart(2, '0');
+      const descMatch = content.match(/^description:\s*"?([^"\n]+)"?/m);
+      const desc = descMatch ? descMatch[1].trim() : titleMatch ? titleMatch[1].trim() : '';
 
-    return { num, label, to: '/docs/' + id, pos };
-  }).sort((a, b) => a.pos - b.pos);
+      return { num, label, to: '/docs/' + id, pos, desc };
+    }).sort((a, b) => a.pos - b.pos);
 }
 
 const dynamicNavItems = getDynamicNavItems();
@@ -45,7 +47,7 @@ const config = {
 
   tagline: "부산대학교 AI융합교육원 온라인 브로슈어",
 
-  favicon: "img/favicon.ico",
+  favicon: "img/favicon.svg",
 
   future: {
     v4: true,
@@ -61,7 +63,7 @@ const config = {
 
   // GitHub Pages deployment config
   organizationName: process.env.GITHUB_REPOSITORY ? process.env.GITHUB_REPOSITORY.split('/')[0] : "pnuai",
-  projectName: process.env.GITHUB_REPOSITORY ? process.env.GITHUB_REPOSITORY.split('/')[1] : "pnu-slate",
+  projectName: process.env.GITHUB_REPOSITORY ? process.env.GITHUB_REPOSITORY.split('/')[1] : "pnu-modu",
 
   onBrokenLinks: "warn",
 
@@ -102,7 +104,7 @@ const config = {
   ],
 
   themeConfig: {
-    image: "img/docusaurus-social-card.jpg",
+    image: "img/social-card.svg",
 
     colorMode: {
       defaultMode: "light",

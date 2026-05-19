@@ -2,26 +2,25 @@ import React from 'react';
 import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
 import useBaseUrl from '@docusaurus/useBaseUrl';
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import { ThemeProvider } from '@site/src/components/BrochureBlocks/ThemeContext';
-
-const CHAPTERS = [
-  { num: '01', label: '사업소개',    path: '/docs/intro',   desc: '대학 소개 및 SW중심대학 선정 배경, 핵심 현황' },
-  { num: '02', label: '교육목표',    path: '/docs/part-2',  desc: '단계별 추진 로드맵 및 분야별 주요 성과' },
-  { num: '03', label: '교육혁신',    path: '/docs/part-3',  desc: '8개 특화 트랙 및 융합교육 혁신 방향' },
-  { num: '04', label: '환경개선',    path: '/docs/part-4',  desc: 'PNU-ICEx 통합 교육 인프라 및 성과관리 체계' },
-  { num: '05', label: '전공교육',    path: '/docs/part-5',  desc: '전공 심화 교육과정 및 산학협력 운영' },
-  { num: '06', label: '융합교육',    path: '/docs/part-6',  desc: 'AI·SW 융합트랙 및 마이크로디그리 운영' },
-  { num: '07', label: '성과확산',    path: '/docs/part-7',  desc: '지역사회 AI·SW 가치확산 및 공교육 연계' },
-  { num: '08', label: '일반현황',    path: '/docs/part-8',  desc: '대학 일반현황 및 주요 지표 통계' },
-];
 
 const COLORS = [
   '#1565c0', '#1976d2', '#1e88e5', '#2196f3',
   '#1976d2', '#1565c0', '#1e88e5', '#2196f3',
+  '#1565c0', '#1976d2',
 ];
 
 export default function Home() {
   const adminUrl = useBaseUrl('/admin/');
+  const { siteConfig } = useDocusaurusContext();
+  const navItems = siteConfig.customFields?.navItems || [];
+  const CHAPTERS = navItems.map((item, i) => ({
+    num: item.num || String(i + 1).padStart(2, '0'),
+    label: item.label,
+    path: item.to,
+    desc: item.desc || '',
+  }));
 
   return (
     <ThemeProvider initialTheme="public-blue">
@@ -63,7 +62,7 @@ export default function Home() {
                 maxWidth: '640px',
               }}>
                 부산대학교 SW중심대학 사업의 비전과 성과를 한눈에 확인하세요.<br />
-                챕터별로 정리된 8개 분야를 탐색할 수 있습니다.
+                챕터별로 정리된 {CHAPTERS.length}개 분야를 탐색할 수 있습니다.
               </p>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                 <Link to="/docs/intro" style={{
@@ -96,7 +95,7 @@ export default function Home() {
                 Contents
               </div>
               <div style={{ fontSize: '28px', fontWeight: '900', color: '#1565c0', letterSpacing: '-0.02em' }}>
-                8개 챕터 구성
+                {CHAPTERS.length}개 챕터 구성
               </div>
             </div>
 

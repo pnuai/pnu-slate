@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>브로슈어 관리 | AI융합교육원</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%232563FF'/%3E%3Cstop offset='100%25' stop-color='%2300D1FF'/%3E%3C/linearGradient%3E%3ClinearGradient id='g2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%237CFF6B'/%3E%3Cstop offset='100%25' stop-color='%2300D1FF'/%3E%3C/linearGradient%3E%3ClinearGradient id='g3' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23FFC857'/%3E%3Cstop offset='100%25' stop-color='%23FF7B61'/%3E%3C/linearGradient%3E%3ClinearGradient id='g4' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%237B61FF'/%3E%3Cstop offset='100%25' stop-color='%232563FF'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='4' y='4' width='24' height='24' rx='7' fill='url(%23g1)'/%3E%3Crect x='36' y='4' width='24' height='24' rx='7' fill='url(%23g2)'/%3E%3Crect x='4' y='36' width='24' height='24' rx='7' fill='url(%23g3)'/%3E%3Crect x='36' y='36' width='24' height='24' rx='7' fill='url(%23g4)'/%3E%3Ccircle cx='32' cy='32' r='4' fill='white' opacity='0.9'/%3E%3C/svg%3E">
+<meta property="og:image" content="https://pnuai.github.io/PNU-Modu/img/social-card.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;800&display=swap" rel="stylesheet">
 <!-- Toast UI Editor -->
@@ -250,7 +252,7 @@
 <nav>
   <div class="nav-left">
     <span class="nav-title">📄 브로슈어 관리</span>
-    <span class="nav-org" id="nav-repo-display">pnuai / pnu-slate</span>
+    <span class="nav-org" id="nav-repo-display">pnuai / pnu-modu</span>
   </div>
   <div class="nav-user" id="nav-user">
     <img class="nav-avatar" id="nav-avatar" src="" alt="">
@@ -305,7 +307,7 @@
         <span class="section-title">대상 레포지토리 (GitHub 소속)</span>
       </div>
       <div style="display:flex;gap:10px;align-items:center;">
-        <input type="text" id="input-repo-name" value="pnu-slate" style="flex:1;" placeholder="예: pnu-slate">
+        <input type="text" id="input-repo-name" value="PNU-Modu" style="flex:1;" placeholder="예: PNU-Modu">
         <button class="btn btn-primary" id="btn-change-repo">변경 적용</button>
       </div>
       <div class="hint" style="margin-top:8px">
@@ -443,13 +445,29 @@
 const ORG = window.location.hostname.includes('github.io') 
   ? window.location.hostname.split('.')[0] 
   : (localStorage.getItem('pnu_admin_org') || 'pnuai');
-let REPO = localStorage.getItem('pnu_admin_repo') || 'pnu-slate';
+// GitHub Pages: pnuai.github.io/PNU-Modu → pathname 첫 세그먼트가 레포명
+const _repoFromUrl = window.location.hostname.includes('github.io')
+  ? (window.location.pathname.split('/').filter(Boolean)[0] || '')
+  : '';
+// localStorage에 이전 레포명(pnu-slate 등)이 남아있을 경우 자동 정리
+const _storedRepo = localStorage.getItem('pnu_admin_repo');
+if (_storedRepo && _storedRepo.toLowerCase() === 'pnu-slate') {
+  localStorage.removeItem('pnu_admin_repo');
+}
+let REPO = (localStorage.getItem('pnu_admin_repo')) || _repoFromUrl || 'PNU-Modu';
 const BRANCH = 'main';
 
 /* ─── 상태 ─── */
 let TOKEN = '';
 let ME = null;
 let selectedFiles = [];
+const dataUrlToPath = new Map(); // data URL → /img/uploads/파일명 (저장 시 치환용)
+
+// 페이지 로드 즉시 input에 현재 REPO 값 반영 (로그인 전에도 올바른 값 표시)
+document.addEventListener('DOMContentLoaded', () => {
+  const repoInput = document.getElementById('input-repo-name');
+  if (repoInput) repoInput.value = REPO;
+});
 
 const getCurUser = () => (ME ? ME.login : 'unknown');
 
@@ -977,6 +995,62 @@ function initEditor() {
       ['table', 'image', 'link'],
       ['code', 'codeblock']
     ],
+    hooks: {
+      addImageBlobHook: async (blob, callback) => {
+        try {
+          showStudioToast('이미지 업로드 중...', 'info');
+
+          // 1. 파일 이름 생성 및 확장자 검사
+          const ext = blob.name ? blob.name.split('.').pop() : 'png';
+          const cleanExt = ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(ext.toLowerCase()) ? ext.toLowerCase() : 'png';
+          const filename = `upload_${Date.now()}.${cleanExt}`;
+
+          // 2. Base64로 인코딩 (data URL 포함)
+          const { dataUrl, base64Content } = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onload = () => {
+              const full = reader.result;
+              resolve({ dataUrl: full, base64Content: full.split(',')[1] });
+            };
+            reader.onerror = error => reject(error);
+          });
+
+          // 3. 프리뷰 즉시 반영: data URL을 callback에 먼저 전달
+          callback(dataUrl, filename);
+          showStudioToast('이미지 프리뷰 적용됨. GitHub 업로드 중...', 'info');
+
+          // 4. GitHub API를 이용하여 백그라운드 업로드 (없으면 skip)
+          if (!ORG || !REPO) {
+            showStudioToast('이미지가 삽입되었습니다. (GitHub 미연결 — 로컬 미리보기 전용)', 'success');
+            return;
+          }
+          const uploadPath = `/repos/${ORG}/${REPO}/contents/static/img/uploads/${filename}`;
+          const res = await ghFetch(uploadPath, {
+            method: 'PUT',
+            body: JSON.stringify({
+              message: `upload(image): add ${filename} via Admin Studio`,
+              content: base64Content,
+              branch: BRANCH
+            })
+          });
+
+          if (!res.ok) {
+            const errData = await res.json();
+            throw new Error(errData.message || 'GitHub API upload failed');
+          }
+
+          // 저장 시 치환할 수 있도록 data URL → 짧은 경로 매핑 등록
+          const publicUrl = `/img/uploads/${filename}`;
+          dataUrlToPath.set(dataUrl, publicUrl);
+
+          showStudioToast('이미지가 GitHub에 업로드되었습니다.', 'success');
+        } catch (err) {
+          console.error('[IMAGE_UPLOAD_ERROR]', err);
+          showStudioToast(`이미지 업로드 실패: ${err.message}`, 'error');
+        }
+      }
+    },
     events: {
       change: () => {
         if (!isSettingContent) syncToPreview();
@@ -1593,7 +1667,11 @@ window.saveEdit = async () => {
   ].filter(l => l !== null).join('\n');
 
   // 저장 시 에디터 본문에 혹시 남아있을 수 있는 프론트매터 블록을 이중 안전 장치로 제거하여 중복 저장 차단
-  const cleanMarkdown = toastEditor.getMarkdown().replace(/^\uFEFF?\s*---\s*[\s\S]*?---\s*/, '');
+  let cleanMarkdown = toastEditor.getMarkdown().replace(/^\uFEFF?\s*---\s*[\s\S]*?---\s*/, '');
+  // data URL \u2192 \uC9E7\uC740 \uACBD\uB85C\uB85C \uCE58\uD658 (GitHub \uC5C5\uB85C\uB4DC \uC644\uB8CC\uB41C \uC774\uBBF8\uC9C0\uB9CC)
+  dataUrlToPath.forEach((publicPath, dataUrl) => {
+    cleanMarkdown = cleanMarkdown.replaceAll(dataUrl, publicPath);
+  });
   const finalText = frontmatter + cleanMarkdown;
   const content = btoa(unescape(encodeURIComponent(finalText)));
   
