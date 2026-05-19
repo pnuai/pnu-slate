@@ -457,6 +457,16 @@ if (_storedRepo && _storedRepo.toLowerCase() === 'pnu-slate') {
 let REPO = (localStorage.getItem('pnu_admin_repo')) || _repoFromUrl || 'PNU-Modu';
 const BRANCH = 'main';
 
+// 배포 환경의 baseUrl: github.io/PNU-Modu/admin/ → baseUrl = /PNU-Modu/
+// 로컬 localhost → baseUrl = /
+const _siteBase = (() => {
+  if (window.location.hostname.includes('github.io')) {
+    const seg = window.location.pathname.split('/').filter(Boolean)[0];
+    return seg ? `/${seg}/` : '/';
+  }
+  return '/';
+})();
+
 /* ─── 상태 ─── */
 let TOKEN = '';
 let ME = null;
@@ -1000,7 +1010,8 @@ function initEditor() {
           const ext = blob.name ? blob.name.split('.').pop() : 'png';
           const cleanExt = ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(ext.toLowerCase()) ? ext.toLowerCase() : 'png';
           const filename = `upload_${Date.now()}.${cleanExt}`;
-          const publicUrl = `/img/uploads/${filename}`;
+          // baseUrl 포함한 절대 경로: /PNU-Modu/img/uploads/... (배포) 또는 /img/uploads/... (로컬)
+          const publicUrl = `${_siteBase}img/uploads/${filename}`;
 
           // GitHub 미연결 시: base64로 삽입 (로컬 미리보기 전용)
           if (!ORG || !REPO || !TOKEN) {
