@@ -211,6 +211,31 @@
     flex-shrink: 0;
   }
 
+  /* IMAGE ALIGN TOOLBAR */
+  #img-align-toolbar {
+    position: fixed;
+    z-index: 9999;
+    background: #1e293b;
+    border-radius: 10px;
+    padding: 5px 6px;
+    display: none;
+    gap: 4px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    align-items: center;
+  }
+  #img-align-toolbar span {
+    font-size: .7rem; font-weight: 700; color: #94a3b8;
+    padding: 0 6px 0 2px; letter-spacing: .05em; text-transform: uppercase;
+  }
+  #img-align-toolbar button {
+    background: transparent; border: none; color: #cbd5e1;
+    padding: 5px 10px; border-radius: 7px; cursor: pointer;
+    font-size: .8rem; font-weight: 700; font-family: inherit;
+    transition: background .15s, color .15s;
+  }
+  #img-align-toolbar button:hover { background: rgba(255,255,255,.12); color: #fff; }
+  #img-align-toolbar button.active { background: #2563eb; color: #fff; }
+
   /* EDITOR OVERRIDE */
   #toast-editor{flex:1;min-height:0;margin-bottom:0;border:1px solid var(--gray-200);border-radius:12px;overflow:hidden;box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);background:white}
   .toastui-editor-defaultUI{border:none !important;height:100% !important}
@@ -434,6 +459,14 @@
           </div>
         </div>
         <iframe src="../preview" class="preview-iframe" id="preview-frame"></iframe>
+
+<!-- 이미지 정렬 floating 툴바 -->
+<div id="img-align-toolbar">
+  <span>정렬</span>
+  <button data-align="left">◀ 왼쪽</button>
+  <button data-align="center">● 가운데</button>
+  <button data-align="right">오른쪽 ▶</button>
+</div>
       </div>
     </div>
   </div>
@@ -1125,6 +1158,100 @@ function initEditor() {
     }, true); // Capture phase!
     console.log("%c[EDITOR] Scroll capturing-phase listener registered successfully.", "color: #10b981;");
 
+    // 이미지 정렬 툴바 초기화
+    const imgAlignToolbar = document.getElementById('img-align-toolbar');
+    imgAlignToolbar.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const newAlign = btn.dataset.align;
+        const md = toastEditor.getMarkdown();
+        const lines = md.split('\n');
+        const row = (toastEditor.getSelection()?.[0]?.[0] ?? 1) - 1;
+
+        // 현재 커서 줄 기준으로 이미지 블록 찾기 (단독 이미지 줄 또는 div 블록)
+        // Case A: 현재 줄이 ![...](url) 형태
+        // Case B: 현재 줄이 <div style="text-align:..."> 블록 내부
+        let imgLine = -1, blockStart = -1, blockEnd = -1;
+
+        // 커서 줄에 직접 이미지가 있는지 확인
+        if (/!\[.*?\]\(.*?\)/.test(lines[row])) {
+          imgLine = row;
+          // div 블록인지 확인 (앞뒤 2줄 안에 div가 있으면 블록으로 간주)
+          if (row >= 2 && /^<div style="text-align/.test(lines[row - 2])) {
+            blockStart = row - 2; blockEnd = row + 2;
+          }
+        } else {
+          // 위아래 5줄 범위 안에서 이미지 줄 탐색
+          for (let d = 1; d <= 5; d++) {
+            if (row - d >= 0 && /!\[.*?\]\(.*?\)/.test(lines[row - d])) { imgLine = row - d; break; }
+            if (row + d < lines.length && /!\[.*?\]\(.*?\)/.test(lines[row + d])) { imgLine = row + d; break; }
+          }
+          if (imgLine >= 0 && imgLine >= 2 && /^<div style="text-align/.test(lines[imgLine - 2])) {
+            blockStart = imgLine - 2; blockEnd = imgLine + 2;
+          }
+        }
+
+        if (imgLine < 0) return; // 이미지 없으면 무시
+
+        // 이미지 마크다운 추출
+        const imgMatch = lines[imgLine].match(/!\[.*?\]\(.*?\)/);
+        if (!imgMatch) return;
+        const imgMd = imgMatch[0];
+
+        // 기존 블록 또는 단독 줄 제거 후 새 정렬로 교체
+        let newLines = [...lines];
+        if (blockStart >= 0) {
+          // div 블록 전체 교체
+          const before = newLines.slice(0, blockStart);
+          const after = newLines.slice(blockEnd + 1);
+          if (newAlign === 'left') {
+            newLines = [...before, imgMd, ...after];
+          } else {
+            newLines = [...before, `<div style="text-align:${newAlign}">`, '', imgMd, '', '</div>', ...after];
+          }
+        } else {
+          // 단독 줄 교체
+          if (newAlign === 'left') {
+            newLines[imgLine] = imgMd;
+          } else {
+            newLines.splice(imgLine, 1, `<div style="text-align:${newAlign}">`, '', imgMd, '', '</div>');
+          }
+        }
+
+        toastEditor.setMarkdown(newLines.join('\n'));
+        syncToPreview();
+
+        // 버튼 active 상태 업데이트
+        imgAlignToolbar.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.align === newAlign));
+      });
+    });
+
+    function updateImgAlignToolbar(row) {
+      const md = toastEditor.getMarkdown();
+      const lines = md.split('\n');
+      // 커서 주변 5줄 안에 이미지가 있는지 확인
+      let hasImg = false, curAlign = 'left';
+      for (let d = 0; d <= 5; d++) {
+        const r = row - 1 + d; // row is 1-indexed
+        if (r < lines.length && /!\[.*?\]\(.*?\)/.test(lines[r])) {
+          hasImg = true;
+          // div 블록 안에 있으면 정렬 읽기
+          if (r >= 2) {
+            const divMatch = lines[r - 2].match(/text-align:(center|right|left)/);
+            if (divMatch) curAlign = divMatch[1];
+          }
+          break;
+        }
+      }
+      if (!hasImg) { imgAlignToolbar.style.display = 'none'; return; }
+
+      // 에디터 영역 위치 기준으로 툴바 위치 설정
+      const editorRect = editorEl.getBoundingClientRect();
+      imgAlignToolbar.style.display = 'flex';
+      imgAlignToolbar.style.top = (editorRect.top + 8) + 'px';
+      imgAlignToolbar.style.left = (editorRect.left + 8) + 'px';
+      imgAlignToolbar.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.align === curAlign));
+    }
+
     // 커서 이동 시 HIGHLIGHT_LINE 전송 및 에디터 하이라이트 위임 바인딩 (ProseMirror 렌더링 루프 후 실행되도록 50ms 지연)
     const trackCaret = () => {
       if (!toastEditor || !previewReady) return;
@@ -1133,10 +1260,13 @@ function initEditor() {
         if (selection && selection[0]) {
           const activeLine = selection[0][0]; // 1-indexed row
           currentActiveLine = activeLine;
-          
+
+          // 이미지 정렬 툴바 업데이트
+          updateImgAlignToolbar(activeLine);
+
           // 에디터 활성 라인 형광펜 표시
           applyHighlightToActiveLine();
-          
+
           const frame = document.getElementById('preview-frame');
           if (frame && frame.contentWindow) {
             console.log(`%c[EDITOR] Caret moved -> posting HIGHLIGHT_LINE: ${activeLine}`, "color: #a855f7;");
