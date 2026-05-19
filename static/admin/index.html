@@ -113,7 +113,7 @@
   .file-card-size{font-size:.74rem;color:var(--gray-400)}
   .file-card-remove{cursor:pointer;color:var(--gray-400);background:none;border:none;font-size:.9rem;padding:3px 7px;border-radius:6px;line-height:1}
   .file-card-remove:hover{color:var(--red);background:var(--red-light)}
-  .file-card-body{padding:16px;display:grid;grid-template-columns:1fr 80px;gap:10px 12px}
+  .file-card-body{padding:16px;display:grid;grid-template-columns:1fr 80px 110px;gap:10px 12px}
   .file-card-body .field{margin:0}
   .file-card-body label{font-size:.74rem;font-weight:700;color:var(--gray-400);margin-bottom:4px;letter-spacing:.04em;text-transform:uppercase}
   .file-card-body input,.file-card-body select,.file-card-body textarea{padding:8px 10px;font-size:.85rem}
@@ -168,7 +168,7 @@
     background: white;
     border-bottom: 1px solid var(--gray-200);
     display: grid;
-    grid-template-columns: 1fr 70px 90px 90px;
+    grid-template-columns: 1fr 60px 80px 110px 110px;
     gap: 12px;
     flex-shrink: 0;
   }
@@ -406,6 +406,10 @@
           <div class="field">
             <label>테마 색상</label>
             <select id="edit-theme"></select>
+          </div>
+          <div class="field">
+            <label>레이아웃</label>
+            <select id="edit-layout"></select>
           </div>
         </div>
         
@@ -1022,10 +1026,16 @@ function initEditor() {
     console.log("%c[EDITOR] Caret tracking listeners registered successfully.", "color: #10b981;");
   }
 
-  // 테마 선택 값 변경 시 즉시 라이브 프리뷰 업데이트 동기화
+  // 테마 및 레이아웃 선택 값 변경 시 즉시 라이브 프리뷰 업데이트 동기화
   const th = document.getElementById('edit-theme');
   if (th) {
     th.addEventListener('change', () => {
+      syncToPreview();
+    });
+  }
+  const ly = document.getElementById('edit-layout');
+  if (ly) {
+    ly.addEventListener('change', () => {
       syncToPreview();
     });
   }
@@ -1041,7 +1051,7 @@ function syncToPreview() {
   
   const content = toastEditor.getMarkdown();
   const theme = document.getElementById('edit-theme')?.value || 'public-blue';
-  const layout = localStorage.getItem("brochure-layout") || 'standard';
+  const layout = document.getElementById('edit-layout')?.value || 'cinema';
   const frame = document.getElementById('preview-frame');
   if (frame && frame.contentWindow) {
     console.log("%c[EDITOR] Dispatching MDX_UPDATE to preview. Length: " + content.length, "color: #3b82f6;");
@@ -1281,7 +1291,11 @@ window.openCreateModal = () => {
   
   const th = document.getElementById('edit-theme');
   if(!th.options.length) th.innerHTML = THEMES.map(t => `<option value="${t.value}">${t.label}</option>`).join('');
-  th.value = 'blue';
+  th.value = 'public-blue';
+  
+  const ly = document.getElementById('edit-layout');
+  if(!ly.options.length) ly.innerHTML = LAYOUTS.map(l => `<option value="${l.value}">${l.label}</option>`).join('');
+  ly.value = 'cinema';
   
   toastEditor.setMarkdown('');
   document.getElementById('modal-edit').style.display = 'flex';
@@ -1341,7 +1355,7 @@ async function doOpenEditModal(name, sha) {
     const d = await r.json();
     const text = decodeURIComponent(escape(atob(d.content)));
     
-    let id='', title='', pos='', theme='public-blue', navLabel='';
+    let id='', title='', pos='', theme='public-blue', layout='cinema', navLabel='';
     // UTF-8 BOM(\uFEFF) 및 시작 부분의 공백/개행을 유연하게 허용하는 정규식
     const match = text.match(/^\uFEFF?\s*---\s*([\s\S]*?)---\s*/);
     let stripped = text;
@@ -1349,7 +1363,7 @@ async function doOpenEditModal(name, sha) {
       stripped = text.substring(match[0].length);
       const fm = match[1];
       const getVal = key => { const m = fm.match(new RegExp(`^${key}:\\s*(.*)$`, 'm')); return m ? m[1].replace(/^["']|["']$/g, '').trim() : ''; };
-      id = getVal('id'); title = getVal('title'); pos = getVal('sidebar_position'); theme = getVal('theme') || 'public-blue'; navLabel = getVal('nav_label');
+      id = getVal('id'); title = getVal('title'); pos = getVal('sidebar_position'); theme = getVal('theme') || 'public-blue'; layout = getVal('layout') || 'cinema'; navLabel = getVal('nav_label');
     }
 
     editTarget = { name, sha: d.sha, text: stripped, navLabel };
@@ -1361,6 +1375,10 @@ async function doOpenEditModal(name, sha) {
     const th = document.getElementById('edit-theme');
     if(!th.options.length) th.innerHTML = THEMES.map(t => `<option value="${t.value}">${t.label}</option>`).join('');
     th.value = theme;
+
+    const ly = document.getElementById('edit-layout');
+    if(!ly.options.length) ly.innerHTML = LAYOUTS.map(l => `<option value="${l.value}">${l.label}</option>`).join('');
+    ly.value = layout;
     
     isSettingContent = true;
     toastEditor.setMarkdown(editTarget.text);
@@ -1559,6 +1577,7 @@ window.saveEdit = async () => {
   const title = document.getElementById('edit-title').value.trim();
   const pos = document.getElementById('edit-pos').value.trim();
   const theme = document.getElementById('edit-theme').value;
+  const layout = document.getElementById('edit-layout').value;
   const navLabel = editTarget?.navLabel || '';
 
   const frontmatter = [
@@ -1568,6 +1587,7 @@ window.saveEdit = async () => {
     navLabel ? `nav_label: ${navLabel}` : null,
     pos ? `sidebar_position: ${pos}` : null,
     theme ? `theme: ${theme}` : null,
+    layout ? `layout: ${layout}` : null,
     '---',
     ''
   ].filter(l => l !== null).join('\n');
@@ -1660,7 +1680,8 @@ function addFiles(newFiles) {
         id: auto.id,
         title: '',
         sidebar_position: auto.sidebar_position,
-        theme: 'blue',
+        theme: 'public-blue',
+        layout: 'cinema',
         description: '',
       });
     }
@@ -1672,6 +1693,14 @@ const THEMES = [
   { value:'public-blue',       label:'공공 블루 (기본)', color:'#1757c2' },
   { value:'startup-gradient',  label:'스타트업 다크',    color:'#6366f1' },
   { value:'minimal-light',     label:'미니멀 라이트',    color:'#18181b' },
+];
+
+const LAYOUTS = [
+  { value:'cinema',   label:'시네마 (Wide)' },
+  { value:'poster',   label:'A3 포스터' },
+  { value:'standard', label:'A4 브로슈어' },
+  { value:'compact',  label:'B5 리플렛' },
+  { value:'slim',     label:'리플렛 (Slim)' }
 ];
 
 function renderFileList() {
@@ -1710,14 +1739,20 @@ function renderFileList() {
             oninput="updateMeta(${i},'sidebar_position',+this.value)">
         </div>
         <div class="field">
+          <label>색상 테마</label>
+          <select onchange="updateMeta(${i},'theme',this.value)">
+            ${THEMES.map(t => `<option value="${t.value}" ${item.theme===t.value?'selected':''}>${t.label}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field">
           <label>ID <span style="color:var(--gray-400);font-weight:400;text-transform:none">(영문)</span></label>
           <input type="text" placeholder="intro" value="${esc(item.id)}"
             oninput="updateMeta(${i},'id',this.value)">
         </div>
-        <div class="field">
-          <label>색상 테마</label>
-          <select onchange="updateMeta(${i},'theme',this.value)">
-            ${THEMES.map(t => `<option value="${t.value}" ${item.theme===t.value?'selected':''}>${t.label}</option>`).join('')}
+        <div class="field" style="grid-column: span 2">
+          <label>레이아웃 (규격)</label>
+          <select onchange="updateMeta(${i},'layout',this.value)">
+            ${LAYOUTS.map(l => `<option value="${l.value}" ${item.layout===l.value?'selected':''}>${l.label}</option>`).join('')}
           </select>
         </div>
         <div class="field field-full">
@@ -1769,7 +1804,7 @@ document.getElementById('btn-upload').addEventListener('click', async () => {
   }
 
   for (const item of selectedFiles) {
-    const { file, id, title, sidebar_position, theme, description } = item;
+    const { file, id, title, sidebar_position, theme, layout, description } = item;
     appendLog(`⬆ ${file.name} 업로드 중…`);
     try {
       /* 원본 텍스트 읽기 */
@@ -1785,6 +1820,7 @@ document.getElementById('btn-upload').addEventListener('click', async () => {
         `title: ${title}`,
         sidebar_position ? `sidebar_position: ${sidebar_position}` : null,
         `theme: ${theme}`,
+        `layout: ${layout || 'cinema'}`,
         description.trim() ? `description: "${description.trim().replace(/"/g,"'")}"` : null,
         '---',
         '',

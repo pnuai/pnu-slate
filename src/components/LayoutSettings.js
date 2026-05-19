@@ -17,10 +17,15 @@ export default function LayoutSettings() {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    const savedLayout = localStorage.getItem("brochure-layout");
-    const initialLayout = savedLayout || defaultLayout;
-    setCurrentLayout(initialLayout);
-    document.documentElement.setAttribute("data-layout", initialLayout);
+    const checkLayout = () => {
+      const activeLayout = document.documentElement.getAttribute("data-layout") || defaultLayout;
+      setCurrentLayout(activeLayout);
+    };
+    checkLayout();
+
+    const observer = new MutationObserver(checkLayout);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-layout"] });
+    return () => observer.disconnect();
   }, [defaultLayout]);
 
   const handleLayoutChange = (layoutId) => {

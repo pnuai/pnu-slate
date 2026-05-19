@@ -470,7 +470,6 @@ export default function PreviewPage() {
             width: 100%;
           }
 
-          /* 실제 브로슈어 .theme-doc-markdown 규격과 동일하게 상속 */
           .theme-doc-markdown {
             font-family: 'Pretendard', 'Noto Sans KR', sans-serif !important;
             background: white !important;
@@ -478,7 +477,7 @@ export default function PreviewPage() {
             box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.15) !important;
             transition: max-width 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
             width: 100% !important;
-            max-width: 1200px; /* 기본 최댓값 강제 지정 */
+            max-width: var(--content-max-width) !important; /* 기본 최댓값 강제 지정 */
             padding: 48px !important;
             box-sizing: border-box !important;
           }

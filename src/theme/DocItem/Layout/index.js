@@ -17,6 +17,12 @@ function DocThemeSync() {
     changeTheme(frontMatter?.theme || 'public-blue');
   }, [frontMatter?.theme]);
 
+  useEffect(() => {
+    const savedLayout = localStorage.getItem("brochure-layout");
+    const layout = frontMatter?.layout || savedLayout || 'cinema';
+    document.documentElement.setAttribute("data-layout", layout);
+  }, [frontMatter?.layout]);
+
   return null;
 }
 
