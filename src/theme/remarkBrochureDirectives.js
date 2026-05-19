@@ -154,7 +154,8 @@ function remarkBrochureDirectives() {
         // AST 노드의 attributes 자체와 hProperties 모두에 완전히 동일하게 치환 공급
         node.attributes = {
           ...attributes,
-          ...parsedProps
+          ...parsedProps,
+          'data-source-line': node.position?.start?.line
         };
 
         const nameMap = {

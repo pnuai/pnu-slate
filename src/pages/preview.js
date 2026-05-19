@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Layout from '@theme/Layout';
 import { MDXProvider } from '@mdx-js/react';
 import MDXComponents from '@theme/MDXComponents';
@@ -99,15 +99,53 @@ export default function PreviewPage() {
   const [rawContent, setRawContent] = useState('');
   const [theme, setTheme] = useState('blue');
   const [layout, setLayout] = useState('standard');
+  
+  const rawContentRef = useRef(rawContent);
+  useEffect(() => {
+    rawContentRef.current = rawContent;
+  }, [rawContent]);
 
-  // rehype-raw가 태그를 소문자로 변환할 것에 대비하여 컴포넌트 맵 보강
+  // rehype-raw가 태그를 소문자로 변환할 것에 대비하여 컴포넌트 맵 보강 및 custom block wrapper 적용
   const componentMap = useMemo(() => {
     const base = { ...MDXComponents };
-    const extended = { ...base };
+    const extended = {};
     
-    // 대문자 컴포넌트를 소문자 키로도 등록 (Highlight -> highlight)
+    const wrapWithLineInfo = (Component, componentName) => {
+      if (typeof Component !== 'function') return Component;
+      return (props) => {
+        const sourceLine = props['data-source-line'] || props.dataSourceLine;
+        return (
+          <div 
+            className={`bb-block-wrapper bb-block-wrapper-${componentName}`}
+            data-source-line={sourceLine} 
+            style={{ display: 'contents' }}
+          >
+            <Component {...props} />
+          </div>
+        );
+      };
+    };
+
+    const brochureKeys = [
+      'hero', 'stats', 'cards', 'timeline', 'quote', 'cta',
+      'chapters', 'roadmap', 'badges', 'kpi', 'strategy',
+      'alphagrid', 'panel', 'stepper', 'split', 'chapterheader',
+      'herosection', 'statssection', 'cardssection', 'timelinesection',
+      'quotesection', 'ctasection', 'chapterssection', 'roadmapsection',
+      'badgessection', 'chapterheadersection', 'kpisection', 'strategysection',
+      'alphagridsection', 'panelsection', 'steppersection', 'splitsection'
+    ];
+
     Object.keys(base).forEach(key => {
-      extended[key.toLowerCase()] = base[key];
+      const lowerKey = key.toLowerCase();
+      const comp = base[key];
+      if (brochureKeys.includes(lowerKey)) {
+        extended[lowerKey] = wrapWithLineInfo(comp, lowerKey);
+        extended[key] = extended[lowerKey];
+      } else {
+        extended[lowerKey] = comp;
+        extended[key] = comp;
+      }
     });
 
     // Docusaurus의 커스텀 Heading 컴포넌트를 표준 HTML 태그로 덮어씌워
@@ -191,6 +229,7 @@ export default function PreviewPage() {
 
     // [3] 프리뷰 요소 클릭 시 소스 에디터의 해당 마크다운 위치로 순간 이동 (Capturing Phase)
     const handleGlobalClick = (e) => {
+      // 자신 또는 부모 중 [data-source-line]이 있는 가장 가까운 요소를 탐색
       const target = e.target.closest('[data-source-line]');
       if (target) {
         if (target.getAttribute('contenteditable') === 'true' || document.querySelector('[contenteditable="true"]')) {
@@ -200,12 +239,27 @@ export default function PreviewPage() {
         e.preventDefault();
         e.stopPropagation();
         
-        const line = parseInt(target.getAttribute('data-source-line'), 10);
+        const startLine = parseInt(target.getAttribute('data-source-line'), 10);
+        let line = startLine;
+        
+        // 클릭된 실제 엘리먼트의 텍스트가 있다면, 더 정확한 행을 추적하기 위해 마크다운 검색 수행
+        const clickedText = e.target.innerText ? e.target.innerText.trim() : '';
+        const rawContentVal = rawContentRef.current;
+        if (clickedText && rawContentVal) {
+          const lines = rawContentVal.split('\n');
+          // 시작 라인(startLine)부터 아래로 25줄 이내 검색
+          for (let i = startLine - 1; i < Math.min(startLine + 25, lines.length); i++) {
+            if (lines[i] && lines[i].includes(clickedText)) {
+              line = i + 1;
+              break;
+            }
+          }
+        }
         
         // 더블클릭 시 포커스 빼앗김을 막기 위해 단일 클릭을 200ms 유예 디바운싱
         if (clickTimeout) clearTimeout(clickTimeout);
         clickTimeout = setTimeout(() => {
-          console.log(`%c[PREVIEW] Click captured on <${target.tagName.toLowerCase()}> (Line ${line}) -> posting JUMP_TO_LINE`, "color: #eab308; font-weight: bold;");
+          console.log(`%c[PREVIEW] Click captured on <${e.target.tagName.toLowerCase()}> (Line ${line}) -> posting JUMP_TO_LINE`, "color: #eab308; font-weight: bold;");
           window.parent.postMessage({
             type: 'JUMP_TO_LINE',
             line: line
@@ -218,8 +272,16 @@ export default function PreviewPage() {
 
     // [4] 더블클릭 시 임시 Plain Text 편집 모드 활성화 (IME-Guarded, 누적 리스너 원천 차단)
     const handleGlobalDblClick = (e) => {
-      const target = e.target.closest('[data-editable="true"]');
-      if (target) {
+      // 자신 또는 부모 중 [data-source-line]이 있는 가장 가까운 요소를 탐색
+      const sourceBlock = e.target.closest('[data-source-line]');
+      if (sourceBlock) {
+        // 이미 에디터 모드인 경우 통과
+        if (e.target.getAttribute('contenteditable') === 'true') return;
+        
+        // 클릭된 타겟 텍스트가 비어있으면 통과
+        const originalTextText = e.target.innerText ? e.target.innerText.trim() : '';
+        if (!originalTextText) return;
+        
         // 더블클릭 감지 시 대기 중인 클릭 이동 즉시 취소 (포커스 유실 방지)
         if (clickTimeout) {
           clearTimeout(clickTimeout);
@@ -229,13 +291,36 @@ export default function PreviewPage() {
         e.preventDefault();
         e.stopPropagation();
         
-        if (target.getAttribute('contenteditable') === 'true') return;
+        const target = e.target; // 더블클릭된 바로 그 텍스트 엘리먼트!
+        
+        // line 번호 찾기
+        const startLine = parseInt(sourceBlock.getAttribute('data-source-line'), 10);
+        let line = startLine;
+        
+        const rawContentVal = rawContentRef.current;
+        if (rawContentVal) {
+          const lines = rawContentVal.split('\n');
+          // 시작 라인(startLine)부터 아래로 25줄 이내 검색
+          for (let i = startLine - 1; i < Math.min(startLine + 25, lines.length); i++) {
+            if (lines[i] && lines[i].includes(originalTextText)) {
+              line = i + 1;
+              break;
+            }
+          }
+        }
         
         target.setAttribute('contenteditable', 'true');
         target.focus();
         
+        // 더블클릭해서 인라인 편집을 시작할 때도 소스 에디터가 해당 위치로 즉시 스무스 스크롤 정렬되도록 전송 (포커스는 스틸하지 않음)
+        window.parent.postMessage({
+          type: 'JUMP_TO_LINE',
+          line: line,
+          focusEditor: false
+        }, '*');
+        
         const originalText = target.innerText;
-        console.log(`%c[PREVIEW] Double-click detected. Inline edit mode enabled on line ${target.getAttribute('data-source-line')}`, "color: #3b82f6; font-weight: bold;");
+        console.log(`%c[PREVIEW] Double-click detected. Inline edit mode enabled on line ${line} for "${originalText}"`, "color: #3b82f6; font-weight: bold;");
         
         // 엔터키 및 ESC키 감지 바인딩
         const handleKeyDown = (keyEvent) => {
@@ -267,8 +352,7 @@ export default function PreviewPage() {
           console.log(`%c[PREVIEW] handleSave called. original: "${cleanOriginal}", new: "${newText}"`, "color: #3b82f6;");
           
           if (newText && newText !== cleanOriginal) {
-            const line = parseInt(target.getAttribute('data-source-line'), 10);
-            console.log(`%c[PREVIEW] Save detected. Posting INLINE_TEXT_UPDATE to parent: "${newText}"`, "color: #3b82f6; font-weight: bold;");
+            console.log(`%c[PREVIEW] Save detected. Posting INLINE_TEXT_UPDATE to parent: "${newText}" on line ${line}`, "color: #3b82f6; font-weight: bold;");
             window.parent.postMessage({
               type: 'INLINE_TEXT_UPDATE',
               line: line,
@@ -411,11 +495,31 @@ export default function PreviewPage() {
           }
 
           /* 시각적 인라인 편집기 가이드라인 및 호버 효과 */
+          [data-source-line] h1,
+          [data-source-line] h2,
+          [data-source-line] h3,
+          [data-source-line] h4,
+          [data-source-line] h5,
+          [data-source-line] h6,
+          [data-source-line] p,
+          [data-source-line] li,
+          [data-source-line] blockquote,
+          [data-source-line] span,
           [data-editable="true"] {
             position: relative;
             cursor: text;
             transition: background-color 0.2s, box-shadow 0.2s !important;
           }
+          [data-source-line] h1:hover,
+          [data-source-line] h2:hover,
+          [data-source-line] h3:hover,
+          [data-source-line] h4:hover,
+          [data-source-line] h5:hover,
+          [data-source-line] h6:hover,
+          [data-source-line] p:hover,
+          [data-source-line] li:hover,
+          [data-source-line] blockquote:hover,
+          [data-source-line] span:hover,
           [data-editable="true"]:hover {
             background-color: rgba(37, 99, 235, 0.03) !important;
             box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.05) !important;

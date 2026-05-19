@@ -3,7 +3,7 @@ const chapters =
 [
   {
     "id": "intro",
-    "title": "사업소개",
+    "title": "대학 소개 및 운영 방향",
     "description": "",
     "theme": "public-blue",
     "link": "/docs/intro",
@@ -11,7 +11,7 @@ const chapters =
   },
   {
     "id": "part-2",
-    "title": "교육목표",
+    "title": "교육목표 및 혁신노력",
     "description": "",
     "theme": "public-blue",
     "link": "/docs/part-2",
@@ -19,7 +19,7 @@ const chapters =
   },
   {
     "id": "part-3",
-    "title": "교육혁신",
+    "title": "대학의 자율적인 교육혁신",
     "description": "",
     "theme": "public-blue",
     "link": "/docs/part-3",
@@ -27,7 +27,7 @@ const chapters =
   },
   {
     "id": "part-4",
-    "title": "환경개선",
+    "title": "교육환경 조성",
     "description": "",
     "theme": "public-blue",
     "link": "/docs/part-4",
@@ -61,7 +61,7 @@ const chapters =
     "id": "part-8",
     "title": "대학 일반 현황",
     "description": "",
-    "theme": "gray",
+    "theme": "blue",
     "link": "/docs/part-8",
     "sidebar_position": 8
   },
@@ -75,7 +75,7 @@ const chapters =
   },
   {
     "id": "template",
-    "title": "템플릿",
+    "title": "브로슈어 블록 작성 가이드 — 전체 디렉티브 참조서",
     "description": "",
     "theme": "public-blue",
     "link": "/docs/template",
