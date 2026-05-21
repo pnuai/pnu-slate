@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>브로슈어 관리 | AI융합교육원</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%232563FF'/%3E%3Cstop offset='100%25' stop-color='%2300D1FF'/%3E%3C/linearGradient%3E%3ClinearGradient id='g2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%237CFF6B'/%3E%3Cstop offset='100%25' stop-color='%2300D1FF'/%3E%3C/linearGradient%3E%3ClinearGradient id='g3' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23FFC857'/%3E%3Cstop offset='100%25' stop-color='%23FF7B61'/%3E%3C/linearGradient%3E%3ClinearGradient id='g4' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%237B61FF'/%3E%3Cstop offset='100%25' stop-color='%232563FF'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='4' y='4' width='24' height='24' rx='7' fill='url(%23g1)'/%3E%3Crect x='36' y='4' width='24' height='24' rx='7' fill='url(%23g2)'/%3E%3Crect x='4' y='36' width='24' height='24' rx='7' fill='url(%23g3)'/%3E%3Crect x='36' y='36' width='24' height='24' rx='7' fill='url(%23g4)'/%3E%3Ccircle cx='32' cy='32' r='4' fill='white' opacity='0.9'/%3E%3C/svg%3E">
 <meta property="og:image" content="https://pnuai.github.io/PNU-Modu/img/social-card.svg">
@@ -1974,9 +1977,13 @@ async function addFiles(newFiles) {
 }
 
 const THEMES = [
-  { value:'public-blue',       label:'공공 블루 (기본)', color:'#1757c2' },
-  { value:'startup-gradient',  label:'스타트업 다크',    color:'#6366f1' },
-  { value:'minimal-light',     label:'미니멀 라이트',    color:'#18181b' },
+  { value:'public-blue',       label:'공공 블루',         color:'#1565c0' },
+  { value:'teal-green',        label:'딥 포레스트',       color:'#154d30' },
+  { value:'royal-purple',      label:'로얄 퍼플',         color:'#3b0764' },
+  { value:'burgundy-gold',     label:'버건디 골드',       color:'#4c0519' },
+  { value:'ocean-cyan',        label:'딥 스틸 블루',      color:'#153d63' },
+  { value:'startup-gradient',  label:'스타트업 다크',     color:'#6366f1' },
+  { value:'minimal-light',     label:'미니멀 라이트',     color:'#18181b' },
 ];
 
 const LAYOUTS = [
@@ -2032,6 +2039,11 @@ function renderFileList() {
           <label>ID <span style="color:var(--gray-400);font-weight:400;text-transform:none">(영문)</span></label>
           <input type="text" placeholder="intro" value="${esc(item.id)}"
             oninput="updateMeta(${i},'id',this.value)">
+        </div>
+        <div class="field">
+          <label>네비 라벨 <span style="color:var(--gray-400);font-weight:400;text-transform:none">(짧게)</span></label>
+          <input type="text" placeholder="개요" value="${esc(item.nav_label || '')}"
+            oninput="updateMeta(${i},'nav_label',this.value)">
         </div>
         <div class="field" style="grid-column: span 2">
           <label>레이아웃 (규격)</label>
